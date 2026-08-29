@@ -16,6 +16,14 @@ if %errorlevel% neq 0 (
     goto finish
 )
 
+:: Check Git User Configuration
+git config user.name >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [INFO] Setting default Git username and email...
+    git config user.name "rohithparamasivam1125-gif"
+    git config user.email "rohithparamasivam1125@gmail.com"
+)
+
 :: Check if repository is initialized
 if not exist ".git" (
     echo [INFO] Initializing Git repository...
@@ -46,9 +54,9 @@ git add .
 echo.
 echo [2/3] Committing changes...
 git commit -m "%commit_msg%"
-if %errorlevel% neq 0 (
-    echo [INFO] No new changes to commit or commit failed.
-)
+
+:: Make sure branch is main
+git branch -M main
 
 echo.
 echo [3/3] Uploading (Pushing) to GitHub (main branch)...
@@ -62,8 +70,8 @@ if %errorlevel% equ 0 (
 ) else (
     echo.
     echo ===================================================
-    echo      [ERROR] Push failed. Check your internet
-    echo      or GitHub credentials/permissions.
+    echo      [ERROR] Push failed. 
+    echo      If prompted for GitHub Login, please sign in.
     echo ===================================================
 )
 
