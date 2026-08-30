@@ -8,8 +8,14 @@ import { FileText, PlusCircle, History } from 'lucide-react';
 
 export const QuotationScreen = () => {
   const [activeSubTab, setActiveSubTab] = useState('create'); // 'create' | 'history'
-  const { quotations, activeQuotationForPrint, setActiveQuotationForPrint } = useApp();
+  const { quotations, activeQuotationForPrint, setActiveQuotationForPrint, editingQuotation } = useApp();
   const [selectedQuotationForView, setSelectedQuotationForView] = useState(null);
+
+  React.useEffect(() => {
+    if (editingQuotation) {
+      setActiveSubTab('create');
+    }
+  }, [editingQuotation]);
 
   return (
     <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10 py-3 sm:py-4 h-[calc(100vh-4.5rem)] flex flex-col">

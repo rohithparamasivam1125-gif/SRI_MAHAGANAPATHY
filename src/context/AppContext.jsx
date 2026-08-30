@@ -10,6 +10,7 @@ import {
   createInvoice as fsCreateInvoice,
   deleteInvoice as fsDeleteInvoice,
   createQuotation as fsCreateQuotation,
+  updateQuotation as fsUpdateQuotation,
   deleteQuotation as fsDeleteQuotation,
   getShopSettings,
   saveShopSettings
@@ -87,6 +88,31 @@ export const AppProvider = ({ children }) => {
   // Active Quotation Cart & Print View
   const [quotationCart, setQuotationCart] = useState([]);
   const [activeQuotationForPrint, setActiveQuotationForPrint] = useState(null);
+  const [editingQuotation, setEditingQuotation] = useState(null);
+
+  const loadQuotationForEdit = (quotation) => {
+    if (!quotation) return;
+    const editItems = (quotation.items || []).map((item, idx) => ({
+      cartItemId: item.cartItemId || `${item.productId || 'item'}_${item.size || 'std'}_${idx}`,
+      productId: item.productId || '',
+      name: item.name,
+      category: item.category || 'General',
+      brand: item.brand || '',
+      hsnCode: item.hsnCode || '',
+      gstRate: item.gstRate !== undefined ? item.gstRate : 18,
+      size: item.size,
+      unit: item.unit || 'Pcs',
+      price: Number(item.price) || 0,
+      mrp: Number(item.mrp) || Number(item.price) || 0,
+      qty: Number(item.qty) || 1,
+      discountPercent: Number(item.discountPercent) || 0,
+      availableStock: item.availableStock || 50
+    }));
+    
+    setQuotationCart(editItems);
+    setEditingQuotation(quotation);
+    setCurrentTab('quotations');
+  };
 
   // Statuses
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -448,16 +474,29 @@ export const AppProvider = ({ children }) => {
     discountOverall = 0, 
     discountType = 'percent',
     discountAmountDirect = 0,
-    isGstEstimate = true 
+    isGstEstimate = true,
+    isEdit = false,
+    quotationId = null,
+    originalQuotationNumber = null,
+    originalDate = null
   }) => {
     if (quotationCart.length === 0) {
       showToast('Quotation list is empty. Please add items first.', 'error');
       return null;
     }
 
+    let quoNumber = '';
+    let quoDate = '';
     const nextSeq = (settings.quotationSequence || 100) + 1;
-    const prefix = settings.quotationPrefix || 'QUO-';
-    const quoNumber = `${prefix}${new Date().getFullYear()}-${String(nextSeq).padStart(4, '0')}`;
+
+    if (isEdit && originalQuotationNumber) {
+      quoNumber = originalQuotationNumber;
+      quoDate = originalDate || new Date().toISOString();
+    } else {
+      const prefix = settings.quotationPrefix || 'QUO-';
+      quoNumber = `${prefix}${new Date().getFullYear()}-${String(nextSeq).padStart(4, '0')}`;
+      quoDate = new Date().toISOString();
+    }
 
     let subtotal = 0;
     let totalTax = 0;
@@ -502,7 +541,7 @@ export const AppProvider = ({ children }) => {
 
     const quotationPayload = {
       quotationNumber: quoNumber,
-      date: new Date().toISOString(),
+      date: quoDate,
       validUntil: validUntilDate.toISOString(),
       validityDays: Number(validityDays || 15),
       customerName: customerName.trim() || 'Prospective Client',
@@ -518,7 +557,7 @@ export const AppProvider = ({ children }) => {
       grandTotal,
       isGstEstimate,
       notes: notes || '',
-      status: 'Active', // 'Active' | 'Converted' | 'Expired'
+      status: isEdit ? (editingQuotation?.status || 'Active') : 'Active', // 'Active' | 'Converted' | 'Expired'
       shopDetails: {
         name: settings.shopName,
         phone: settings.phone,
@@ -528,17 +567,24 @@ export const AppProvider = ({ children }) => {
     };
 
     try {
-      const docId = await fsCreateQuotation(quotationPayload);
-      quotationPayload.id = docId;
+      if (isEdit && quotationId) {
+        await fsUpdateQuotation(quotationId, quotationPayload);
+        quotationPayload.id = quotationId;
+        showToast(`Quotation #${quoNumber} updated successfully!`, 'success');
+      } else {
+        const docId = await fsCreateQuotation(quotationPayload);
+        quotationPayload.id = docId;
 
-      // Update sequence in settings
-      const newSettings = { ...settings, quotationSequence: nextSeq };
-      setSettings(newSettings);
-      saveShopSettings({ quotationSequence: nextSeq });
+        // Update sequence in settings
+        const newSettings = { ...settings, quotationSequence: nextSeq };
+        setSettings(newSettings);
+        saveShopSettings({ quotationSequence: nextSeq });
+        showToast(`Quotation #${quoNumber} created! Total: ₹${grandTotal}`, 'success');
+      }
 
       clearQuotationCart();
+      setEditingQuotation(null);
       setActiveQuotationForPrint(quotationPayload);
-      showToast(`Quotation #${quoNumber} created! Total: ₹${grandTotal}`, 'success');
 
       return quotationPayload;
     } catch (e) {
@@ -621,6 +667,9 @@ export const AppProvider = ({ children }) => {
         quotationCart,
         activeQuotationForPrint,
         setActiveQuotationForPrint,
+        editingQuotation,
+        setEditingQuotation,
+        loadQuotationForEdit,
         isLoadingProducts,
         isFirebaseConnected,
         firebaseError,

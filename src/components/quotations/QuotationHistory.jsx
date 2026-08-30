@@ -10,13 +10,14 @@ import {
   User, 
   MapPin, 
   X,
-  Clock
+  Clock,
+  Edit
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { useApp } from '../../context/AppContext';
 
 export const QuotationHistory = ({ onSelectQuotation }) => {
-  const { quotations, deleteQuotationRecord, convertQuotationToActiveBill } = useApp();
+  const { quotations, deleteQuotationRecord, convertQuotationToActiveBill, loadQuotationForEdit } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredQuotations = useMemo(() => {
@@ -157,6 +158,15 @@ export const QuotationHistory = ({ onSelectQuotation }) => {
                           title="View & Print Quotation"
                         >
                           <Printer className="w-4 h-4" />
+                        </button>
+
+                        {/* Edit */}
+                        <button
+                          onClick={() => loadQuotationForEdit(quo)}
+                          className="p-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 rounded-lg transition-colors"
+                          title="Edit Quotation"
+                        >
+                          <Edit className="w-4 h-4" />
                         </button>
 
                         {/* Delete */}

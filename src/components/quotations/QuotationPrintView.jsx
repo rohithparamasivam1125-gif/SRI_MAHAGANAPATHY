@@ -17,8 +17,9 @@ import { useApp } from '../../context/AppContext';
 import { PRINT_TRANSLATIONS } from '../../utils/printTranslations';
 
 export const QuotationPrintView = ({ quotation, onClose }) => {
-  const { settings, convertQuotationToActiveBill } = useApp();
+  const { settings, convertQuotationToActiveBill, processQuotation } = useApp();
   const [printLanguage, setPrintLanguage] = useState('en'); // 'en' | 'ta' | 'bilingual'
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!quotation) return null;
 
@@ -31,6 +32,31 @@ export const QuotationPrintView = ({ quotation, onClose }) => {
   const handleConvertToBill = () => {
     convertQuotationToActiveBill(quotation);
     onClose();
+  };
+
+  const handleConfirmSave = async () => {
+    setIsSaving(true);
+    try {
+      await processQuotation({
+        customerName: quotation.customerName,
+        customerPhone: quotation.customerPhone,
+        siteLocation: quotation.siteLocation,
+        validityDays: quotation.validityDays,
+        notes: quotation.notes,
+        discountOverall: quotation.rawOverallDiscount || 0,
+        discountType: quotation.rawOverallDiscountType || 'percent',
+        discountAmountDirect: quotation.rawOverallDiscountType === 'amount' ? (quotation.rawOverallDiscount || 0) : 0,
+        isGstEstimate: quotation.isGstEstimate,
+        isEdit: quotation.isEdit,
+        quotationId: quotation.id,
+        originalQuotationNumber: quotation.quotationNumber,
+        originalDate: quotation.date
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const items = quotation.items || [];
@@ -92,33 +118,62 @@ export const QuotationPrintView = ({ quotation, onClose }) => {
               </button>
             </div>
 
-            {/* Convert to Bill Button */}
-            <button
-              onClick={handleConvertToBill}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95"
-              title="Convert this quotation directly into an active Counter Bill for billing"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span>Convert to Bill</span>
-            </button>
+            {quotation.isUnsavedPreview ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleConfirmSave}
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : quotation.isEdit ? 'Save Changes' : 'Confirm & Save'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
+                >
+                  <span>Back to Edit</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Convert to Bill Button */}
+                <button
+                  onClick={handleConvertToBill}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95"
+                  title="Convert this quotation directly into an active Counter Bill for billing"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Convert to Bill</span>
+                </button>
 
-            {/* Print Button */}
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print Quote</span>
-            </button>
+                {/* Print Button */}
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Quote</span>
+                </button>
 
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+                <button
+                  onClick={onClose}
+                  className="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
+
+        {quotation.isUnsavedPreview && (
+          <div className="no-print bg-amber-50 border-y border-amber-200 px-4 py-2 text-center text-xs font-bold text-amber-800 flex items-center justify-center gap-2">
+            <span>⚠️ This is a DRAFT PREVIEW. The quotation has NOT been saved to the database.</span>
+          </div>
+        )}
 
         {/* Printable Document Body */}
         <div className="p-2 sm:p-6 overflow-y-auto flex-1 bg-slate-200/70 flex justify-center">

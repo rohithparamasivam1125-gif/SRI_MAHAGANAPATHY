@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, generateInvoiceNumber } from '../../utils/formatters';
 
 export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
-  const { cart, processCheckout, settings } = useApp();
+  const { cart, processCheckout, settings, setActiveInvoiceForPrint } = useApp();
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -30,12 +30,27 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   React.useEffect(() => {
-    if (initialDiscount) {
+    if (initialDiscount && isOpen) {
       if (initialDiscount.overallDiscount !== undefined) {
         setOverallDiscount(initialDiscount.overallDiscount);
       }
       if (initialDiscount.overallDiscountType) {
         setOverallDiscountType(initialDiscount.overallDiscountType);
+      }
+      if (initialDiscount.customerName !== undefined) {
+        setCustomerName(initialDiscount.customerName);
+      }
+      if (initialDiscount.customerPhone !== undefined) {
+        setCustomerPhone(initialDiscount.customerPhone);
+      }
+      if (initialDiscount.paymentMode !== undefined) {
+        setPaymentMode(initialDiscount.paymentMode);
+      }
+      if (initialDiscount.isGstBill !== undefined) {
+        setIsGstBill(initialDiscount.isGstBill);
+      }
+      if (initialDiscount.notes !== undefined) {
+        setNotes(initialDiscount.notes);
       }
     }
   }, [initialDiscount, isOpen]);
@@ -64,6 +79,79 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
     overallDiscountAmount = (netBeforeOverall * (Number(overallDiscount) || 0)) / 100;
   }
   const grandTotal = Math.round(netBeforeOverall - overallDiscountAmount);
+
+  const handlePreviewBill = () => {
+    const nextSeq = (settings.invoiceSequence || 100) + 1;
+    const invNumber = generateInvoiceNumber(nextSeq, settings.invoicePrefix || 'SMG-');
+
+    let subtotal = 0;
+    let totalTax = 0;
+
+    const finalizedItems = cart.map((item) => {
+      const lineBase = item.price * item.qty;
+      const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
+      const lineTaxable = lineBase - itemDiscount;
+      const itemTax = isGstBill ? (lineTaxable * (item.gstRate !== undefined ? item.gstRate : 18)) / 100 : 0;
+      const lineTotal = lineTaxable + itemTax;
+
+      subtotal += lineTaxable;
+      totalTax += itemTax;
+
+      return {
+        ...item,
+        lineBase,
+        itemDiscount,
+        lineTaxable,
+        itemTax,
+        lineTotal
+      };
+    });
+
+    const netBeforeOverall = subtotal + totalTax;
+    let finalOverallDiscount = 0;
+    let finalDiscountPercent = 0;
+
+    if (overallDiscountType === 'amount') {
+      finalOverallDiscount = Math.min(netBeforeOverall, Math.max(0, Number(overallDiscount) || 0));
+      finalDiscountPercent = netBeforeOverall > 0 ? Number(((finalOverallDiscount / netBeforeOverall) * 100).toFixed(2)) : 0;
+    } else {
+      finalDiscountPercent = Number(overallDiscount) || 0;
+      finalOverallDiscount = (netBeforeOverall * finalDiscountPercent) / 100;
+    }
+
+    const grandTotal = Math.round(netBeforeOverall - finalOverallDiscount);
+    const roundOff = Number((grandTotal - (netBeforeOverall - finalOverallDiscount)).toFixed(2));
+
+    const tempInvoice = {
+      isUnsavedPreview: true,
+      invoiceNumber: invNumber,
+      date: new Date().toISOString(),
+      customerName: customerName.trim() || 'Walk-in Customer',
+      customerPhone: customerPhone.trim() || '',
+      paymentMode: paymentMode || 'Cash',
+      items: finalizedItems,
+      totalItemsCount: cart.length,
+      subtotal: Number(subtotal.toFixed(2)),
+      totalTax: Number(totalTax.toFixed(2)),
+      discountOverall: finalDiscountPercent,
+      discountAmount: Number(finalOverallDiscount.toFixed(2)),
+      roundOff,
+      grandTotal,
+      isGstBill,
+      notes: notes || '',
+      rawOverallDiscount: Number(overallDiscount) || 0,
+      rawOverallDiscountType: overallDiscountType,
+      shopDetails: {
+        name: settings.shopName,
+        phone: settings.phone,
+        address: settings.address,
+        gstin: settings.gstin
+      }
+    };
+
+    setActiveInvoiceForPrint(tempInvoice);
+    onClose();
+  };
 
   const handleSubmitBill = async (e) => {
     e.preventDefault();
@@ -306,21 +394,28 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="w-1/3 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors"
+              className="flex-1 min-w-[80px] py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors"
             >
               Cancel
             </button>
             <button
+              type="button"
+              onClick={handlePreviewBill}
+              className="flex-1 min-w-[120px] py-2.5 px-4 border border-blue-600 hover:bg-blue-50 text-blue-700 font-bold rounded-xl text-sm transition-all"
+            >
+              Preview Bill
+            </button>
+            <button
               type="submit"
               disabled={isSubmitting}
-              className="w-2/3 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-50"
+              className="flex-[2] min-w-[160px] py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-50"
             >
               <Printer className="w-4 h-4" />
-              <span>{isSubmitting ? 'Saving to Firebase...' : 'Save & Print Invoice'}</span>
+              <span>{isSubmitting ? 'Saving...' : 'Save & Print Invoice'}</span>
             </button>
           </div>
 

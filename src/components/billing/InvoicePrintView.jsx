@@ -16,9 +16,10 @@ import { useApp } from '../../context/AppContext';
 import { PRINT_TRANSLATIONS } from '../../utils/printTranslations';
 
 export const InvoicePrintView = ({ invoice, onClose }) => {
-  const { settings } = useApp();
+  const { settings, processCheckout } = useApp();
   const [printFormat, setPrintFormat] = useState('A4'); // 'A4' or 'Thermal'
   const [printLanguage, setPrintLanguage] = useState('en'); // 'en' | 'ta' | 'bilingual'
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!invoice) return null;
 
@@ -26,6 +27,26 @@ export const InvoicePrintView = ({ invoice, onClose }) => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleConfirmSave = async () => {
+    setIsSaving(true);
+    try {
+      await processCheckout({
+        customerName: invoice.customerName,
+        customerPhone: invoice.customerPhone,
+        paymentMode: invoice.paymentMode,
+        notes: invoice.notes,
+        discountOverall: invoice.rawOverallDiscount || 0,
+        discountType: invoice.rawOverallDiscountType || 'percent',
+        discountAmountDirect: invoice.rawOverallDiscountType === 'amount' ? (invoice.rawOverallDiscount || 0) : 0,
+        isGstBill: invoice.isGstBill
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -110,24 +131,53 @@ export const InvoicePrintView = ({ invoice, onClose }) => {
               </button>
             </div>
 
-            {/* Print Button */}
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Print Bill</span>
-            </button>
+            {invoice.isUnsavedPreview ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleConfirmSave}
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : 'Confirm & Save Bill'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
+                >
+                  <span>Back to Edit</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Print Button */}
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Bill</span>
+                </button>
 
-            {/* Close */}
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors ml-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
+                {/* Close */}
+                <button
+                  onClick={onClose}
+                  className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors ml-1"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
+
+        {invoice.isUnsavedPreview && (
+          <div className="no-print bg-amber-50 border-y border-amber-200 px-4 py-2 text-center text-xs font-bold text-amber-800 flex items-center justify-center gap-2">
+            <span>⚠️ This is a DRAFT PREVIEW. The invoice has NOT been saved to the database.</span>
+          </div>
+        )}
 
         {/* Invoice Body Printable Area */}
         <div className="p-2 sm:p-6 overflow-y-auto max-h-[82vh] bg-slate-200/70 flex justify-center">

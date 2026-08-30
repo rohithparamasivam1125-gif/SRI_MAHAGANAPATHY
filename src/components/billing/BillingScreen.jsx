@@ -46,7 +46,20 @@ export const BillingScreen = () => {
       {activeInvoiceForPrint && (
         <InvoicePrintView
           invoice={activeInvoiceForPrint}
-          onClose={() => setActiveInvoiceForPrint(null)}
+          onClose={() => {
+            if (activeInvoiceForPrint.isUnsavedPreview) {
+              handleOpenCheckout({
+                overallDiscount: activeInvoiceForPrint.rawOverallDiscount,
+                overallDiscountType: activeInvoiceForPrint.rawOverallDiscountType || 'percent',
+                customerName: activeInvoiceForPrint.customerName,
+                customerPhone: activeInvoiceForPrint.customerPhone,
+                paymentMode: activeInvoiceForPrint.paymentMode,
+                isGstBill: activeInvoiceForPrint.isGstBill,
+                notes: activeInvoiceForPrint.notes
+              });
+            }
+            setActiveInvoiceForPrint(null);
+          }}
         />
       )}
 

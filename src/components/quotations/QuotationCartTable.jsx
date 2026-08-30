@@ -24,7 +24,11 @@ export const QuotationCartTable = () => {
     updateQuotationCartItem, 
     removeFromQuotationCart, 
     clearQuotationCart,
-    processQuotation 
+    processQuotation,
+    editingQuotation,
+    setEditingQuotation,
+    setActiveQuotationForPrint,
+    settings
   } = useApp();
 
   const [customerName, setCustomerName] = useState('');
@@ -36,6 +40,28 @@ export const QuotationCartTable = () => {
   const [isGstEstimate, setIsGstEstimate] = useState(true);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    if (editingQuotation) {
+      setCustomerName(editingQuotation.customerName || '');
+      setCustomerPhone(editingQuotation.customerPhone || '');
+      setSiteLocation(editingQuotation.siteLocation || '');
+      setValidityDays(editingQuotation.validityDays || 15);
+      setDiscountOverall(editingQuotation.discountOverall || 0);
+      setDiscountOverallType(editingQuotation.discountType || 'percent');
+      setIsGstEstimate(editingQuotation.isGstEstimate !== false);
+      setNotes(editingQuotation.notes || '');
+    } else {
+      setCustomerName('');
+      setCustomerPhone('');
+      setSiteLocation('');
+      setValidityDays(15);
+      setDiscountOverall(0);
+      setDiscountOverallType('percent');
+      setIsGstEstimate(true);
+      setNotes('');
+    }
+  }, [editingQuotation]);
 
   // Calculations preserving custom product GST %
   const totalBase = quotationCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -61,8 +87,87 @@ export const QuotationCartTable = () => {
   }
   const estimatedTotal = Math.round(netBeforeOverall - overallDiscountAmt);
 
+  const handlePreviewQuotation = () => {
+    if (quotationCart.length === 0) return;
+
+    let subtotal = 0;
+    let totalTax = 0;
+
+    const finalizedItems = quotationCart.map((item) => {
+      const lineBase = item.price * item.qty;
+      const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
+      const lineTaxable = lineBase - itemDiscount;
+      const itemTax = isGstEstimate ? (lineTaxable * (item.gstRate !== undefined ? item.gstRate : 18)) / 100 : 0;
+      const lineTotal = lineTaxable + itemTax;
+
+      subtotal += lineTaxable;
+      totalTax += itemTax;
+
+      return {
+        ...item,
+        lineBase,
+        itemDiscount,
+        lineTaxable,
+        itemTax,
+        lineTotal
+      };
+    });
+
+    const netBeforeOverall = subtotal + totalTax;
+    let finalOverallDiscount = 0;
+    let finalDiscountPercent = 0;
+
+    if (discountOverallType === 'amount') {
+      finalOverallDiscount = Math.min(netBeforeOverall, Math.max(0, Number(discountOverall) || 0));
+      finalDiscountPercent = netBeforeOverall > 0 ? Number(((finalOverallDiscount / netBeforeOverall) * 100).toFixed(2)) : 0;
+    } else {
+      finalDiscountPercent = Number(discountOverall) || 0;
+      finalOverallDiscount = (netBeforeOverall * finalDiscountPercent) / 100;
+    }
+
+    const grandTotal = Math.round(netBeforeOverall - finalOverallDiscount);
+    const roundOff = Number((grandTotal - (netBeforeOverall - finalOverallDiscount)).toFixed(2));
+
+    const validUntilDate = new Date();
+    validUntilDate.setDate(validUntilDate.getDate() + Number(validityDays || 15));
+
+    const tempQuotation = {
+      isUnsavedPreview: true,
+      isEdit: !!editingQuotation,
+      id: editingQuotation?.id || null,
+      quotationNumber: editingQuotation?.quotationNumber || `QUO-TEMP`,
+      date: editingQuotation?.date || new Date().toISOString(),
+      validUntil: validUntilDate.toISOString(),
+      validityDays: Number(validityDays || 15),
+      customerName: customerName.trim() || 'Prospective Client',
+      customerPhone: customerPhone.trim() || '',
+      siteLocation: siteLocation ? siteLocation.trim() : '',
+      items: finalizedItems,
+      totalItemsCount: quotationCart.length,
+      subtotal: Number(subtotal.toFixed(2)),
+      totalTax: Number(totalTax.toFixed(2)),
+      discountOverall: finalDiscountPercent,
+      discountAmount: Number(finalOverallDiscount.toFixed(2)),
+      rawOverallDiscount: Number(discountOverall) || 0,
+      rawOverallDiscountType: discountOverallType,
+      roundOff,
+      grandTotal,
+      isGstEstimate,
+      notes: notes || '',
+      status: editingQuotation?.status || 'Active',
+      shopDetails: {
+        name: settings.shopName,
+        phone: settings.phone,
+        address: settings.address,
+        gstin: settings.gstin
+      }
+    };
+
+    setActiveQuotationForPrint(tempQuotation);
+  };
+
   const handleGenerateQuotation = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (quotationCart.length === 0) return;
 
     setIsSubmitting(true);
@@ -76,7 +181,11 @@ export const QuotationCartTable = () => {
         discountType: discountOverallType,
         discountAmountDirect: discountOverallType === 'amount' ? Number(discountOverall) || 0 : 0,
         isGstEstimate,
-        notes
+        notes,
+        isEdit: !!editingQuotation,
+        quotationId: editingQuotation?.id || null,
+        originalQuotationNumber: editingQuotation?.quotationNumber || null,
+        originalDate: editingQuotation?.date || null
       });
       // Reset form
       setCustomerName('');
@@ -115,6 +224,22 @@ export const QuotationCartTable = () => {
           </button>
         )}
       </div>
+
+      {editingQuotation && (
+        <div className="mx-3 mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-800">
+          <span className="font-bold">✏️ Editing Quotation: {editingQuotation.quotationNumber}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setEditingQuotation(null);
+              clearQuotationCart();
+            }}
+            className="px-2 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 font-black rounded-lg transition-colors"
+          >
+            Cancel Edit
+          </button>
+        </div>
+      )}
 
       {/* Customer Info Mini-Form */}
       <div className="p-3 bg-slate-50 border-b border-slate-200 space-y-2 text-xs">
@@ -410,15 +535,31 @@ export const QuotationCartTable = () => {
             </div>
           </div>
 
-          {/* Settle / Print Button */}
-          <button
-            onClick={handleGenerateQuotation}
-            disabled={isSubmitting}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white font-black rounded-xl shadow-lg shadow-blue-700/30 flex items-center justify-center gap-2 text-sm sm:text-base transition-all active:scale-98 disabled:opacity-50"
-          >
-            <Printer className="w-5 h-5" />
-            <span>{isSubmitting ? 'Saving Proposal...' : 'Generate & Print Quotation'}</span>
-          </button>
+          {/* Settle / Print / Preview Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePreviewQuotation}
+              className="w-1/3 py-3 px-3 border border-blue-600 hover:bg-blue-50 text-blue-700 font-bold rounded-xl text-xs sm:text-sm transition-colors"
+            >
+              Preview Proposal
+            </button>
+            <button
+              type="button"
+              onClick={handleGenerateQuotation}
+              disabled={isSubmitting}
+              className="w-2/3 py-3 px-4 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white font-black rounded-xl shadow-md flex items-center justify-center gap-2 text-xs sm:text-sm transition-all disabled:opacity-50"
+            >
+              <Printer className="w-4 h-4" />
+              <span>
+                {isSubmitting
+                  ? 'Saving...'
+                  : editingQuotation
+                  ? 'Save Changes'
+                  : 'Generate & Print'}
+              </span>
+            </button>
+          </div>
 
         </div>
       )}
