@@ -15,17 +15,19 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, capitalizeInput } from '../../utils/formatters';
 
 export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
   const { cart, processCheckout, settings } = useApp();
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerGstin, setCustomerGstin] = useState('');
   const [paymentMode, setPaymentMode] = useState('Cash');
   const [overallDiscount, setOverallDiscount] = useState(0);
   const [overallDiscountType, setOverallDiscountType] = useState('percent'); // 'percent' or 'amount'
   const [isGstBill, setIsGstBill] = useState(true);
+  const [showDiscount, setShowDiscount] = useState(true);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -73,12 +75,14 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
       await processCheckout({
         customerName,
         customerPhone,
+        customerGstin,
         paymentMode,
         notes,
         discountOverall: overallDiscountType === 'percent' ? Number(overallDiscount) || 0 : 0,
         discountType: overallDiscountType,
         discountAmountDirect: overallDiscountType === 'amount' ? Number(overallDiscount) || 0 : 0,
-        isGstBill
+        isGstBill,
+        showDiscount
       });
 
       // Confetti celebration
@@ -134,7 +138,7 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
                   type="text"
                   placeholder="e.g. Ramesh / Walk-in"
                   value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  onChange={(e) => setCustomerName(capitalizeInput(e.target.value))}
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium"
                 />
               </div>
@@ -154,6 +158,24 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium font-mono-numbers"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Customer GSTIN */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Customer GST Number / GSTIN <span className="text-slate-400 font-normal">(Optional for B2B Bill)</span>
+            </label>
+            <div className="relative">
+              <FileSpreadsheet className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="e.g. 33AAAAA0000A1Z5"
+                value={customerGstin}
+                onChange={(e) => setCustomerGstin(e.target.value.toUpperCase())}
+                maxLength={15}
+                className="w-full pl-9 pr-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-mono font-bold uppercase tracking-wider"
+              />
             </div>
           </div>
 
@@ -190,7 +212,7 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
             </div>
           </div>
 
-          {/* Bill Settings (GST vs Non-GST, Extra Overall Discount) */}
+          {/* Bill Settings (GST vs Non-GST, Extra Overall Discount, Show/Hide Discount) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             
             {/* Overall Discount */}
@@ -262,6 +284,28 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
 
           </div>
 
+          {/* Show Discount Checkbox */}
+          <div className="pt-1">
+            <label className="flex items-center gap-2.5 p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-100/60 transition-colors">
+              <input
+                type="checkbox"
+                checked={showDiscount}
+                onChange={(e) => setShowDiscount(e.target.checked)}
+                className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-slate-300"
+              />
+              <div>
+                <span className="text-xs font-bold text-emerald-950 block leading-tight">
+                  Display Discount on Bill / PDF
+                </span>
+                <span className="text-[10px] text-emerald-800">
+                  {showDiscount 
+                    ? 'Discount % and deduction rows will be displayed to customer' 
+                    : 'Discounts will be hidden from customer (only net prices & totals shown)'}
+                </span>
+              </div>
+            </label>
+          </div>
+
           {/* Notes */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -277,17 +321,23 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
           </div>
 
           {/* Bill Calculation Box */}
-          <div className="p-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl space-y-2">
+          <div className="p-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl space-y-1.5">
             <div className="flex justify-between text-xs text-slate-300">
-              <span>Subtotal ({cart.length} items):</span>
+              <span>Taxable Subtotal ({cart.length} items):</span>
               <span className="font-mono-numbers">{formatCurrency(taxableSubtotal)}</span>
             </div>
 
-            {isGstBill && (
-              <div className="flex justify-between text-xs text-slate-300">
-                <span>Total GST / Tax:</span>
-                <span className="font-mono-numbers">{formatCurrency(totalTax)}</span>
-              </div>
+            {isGstBill && totalTax > 0 && (
+              <>
+                <div className="flex justify-between text-xs text-slate-300">
+                  <span>CGST (Central Tax):</span>
+                  <span className="font-mono-numbers">{formatCurrency(totalTax / 2)}</span>
+                </div>
+                <div className="flex justify-between text-xs text-slate-300">
+                  <span>SGST (State Tax):</span>
+                  <span className="font-mono-numbers">{formatCurrency(totalTax / 2)}</span>
+                </div>
+              </>
             )}
 
             {overallDiscountAmount > 0 && (

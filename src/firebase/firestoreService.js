@@ -9,6 +9,7 @@ import {
   orderBy,
   writeBatch,
   getDocs,
+  where,
   setDoc,
   getDoc,
   serverTimestamp,
@@ -26,13 +27,27 @@ const SETTINGS_DOC_ID = 'shop_profile';
 // PRODUCTS SERVICE
 // ==========================================
 
+const PKT_REGEX = /\s*\(\s*\d+\s*(?:\/|\s)*(?:pkt|pkts|packet|pack|box|bag|ctn|set)\s*\)/gi;
+
+export const sanitizeProduct = (product) => {
+  if (!product) return product;
+  const name = product.name ? product.name.replace(PKT_REGEX, '').trim() : product.name;
+  const variants = Array.isArray(product.variants)
+    ? product.variants.map((v) => ({
+        ...v,
+        size: v.size ? v.size.replace(PKT_REGEX, '').trim() : v.size,
+      }))
+    : product.variants;
+  return { ...product, name, variants };
+};
+
 export const subscribeToProducts = (onData, onError) => {
   try {
     const colRef = collection(db, PRODUCTS_COLLECTION);
     return onSnapshot(
       colRef,
       (snapshot) => {
-        const products = snapshot.docs.map((doc) => ({
+        const products = snapshot.docs.map((doc) => sanitizeProduct({
           id: doc.id,
           ...doc.data(),
         }));
@@ -196,11 +211,30 @@ export const createQuotation = async (quotationData) => {
 };
 
 export const updateQuotation = async (id, quotationData) => {
-  const docRef = doc(db, QUOTATIONS_COLLECTION, id);
+  let docId = id;
+  if (!docId && quotationData.quotationNumber) {
+    const q = query(collection(db, QUOTATIONS_COLLECTION), where('quotationNumber', '==', quotationData.quotationNumber));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      docId = snap.docs[0].id;
+    }
+  }
+
+  if (!docId) {
+    const newDoc = await addDoc(collection(db, QUOTATIONS_COLLECTION), {
+      ...quotationData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return newDoc.id;
+  }
+
+  const docRef = doc(db, QUOTATIONS_COLLECTION, docId);
   await updateDoc(docRef, {
     ...quotationData,
     updatedAt: serverTimestamp(),
   });
+  return docId;
 };
 
 export const deleteQuotation = async (id) => {

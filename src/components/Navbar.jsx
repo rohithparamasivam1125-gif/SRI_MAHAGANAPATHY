@@ -9,7 +9,8 @@ import {
   Settings, 
   Database, 
   Sparkles,
-  FileText
+  FileText,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -129,6 +130,19 @@ export const Navbar = () => {
             >
               <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
               <span>Analytics</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('gst-reports')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm sm:text-base font-bold transition-all ${
+                currentTab === 'gst-reports'
+                  ? 'bg-white text-blue-700 shadow-xs ring-1 ring-slate-200/60'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/60'
+              }`}
+              title="GST Monthly & Financial Year Reports for Auditor"
+            >
+              <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
+              <span>GST Reports</span>
             </button>
 
             <button

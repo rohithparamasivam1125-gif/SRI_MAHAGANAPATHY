@@ -9,18 +9,41 @@ import {
   Sparkles,
   Filter,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Tag
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatCurrency } from '../../utils/formatters';
+import { getBrandTheme } from '../../utils/brandColorHelper';
 
 export const QuotationCatalogGrid = () => {
-  const { products, addToQuotationCart, seedStarterProducts, isLoadingProducts } = useApp();
+  const { products, addToQuotationCart, seedStarterProducts, isLoadingProducts, settings } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedBrand, setSelectedBrand] = useState('ALL');
   const [selectedSubcategory, setSelectedSubcategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSubcategoriesExpanded, setIsSubcategoriesExpanded] = useState(false);
+
+  // Extract unique brands and product counts
+  const { availableBrands, brandCounts } = useMemo(() => {
+    const brands = new Set();
+    const counts = { ALL: 0 };
+
+    products.forEach((p) => {
+      if (selectedCategory === 'ALL' || p.category === selectedCategory) {
+        counts.ALL = (counts.ALL || 0) + 1;
+        const b = (p.brand || 'Unbranded').trim();
+        brands.add(b);
+        counts[b] = (counts[b] || 0) + 1;
+      }
+    });
+
+    return {
+      availableBrands: ['ALL', ...Array.from(brands).sort()],
+      brandCounts: counts
+    };
+  }, [products, selectedCategory]);
 
   // Extract unique subcategories and product counts
   const { availableSubcategories, subcategoryCounts } = useMemo(() => {
@@ -29,10 +52,12 @@ export const QuotationCatalogGrid = () => {
 
     products.forEach((p) => {
       if (selectedCategory === 'ALL' || p.category === selectedCategory) {
-        counts.ALL = (counts.ALL || 0) + 1;
-        const sub = p.subcategory || 'General';
-        subs.add(sub);
-        counts[sub] = (counts[sub] || 0) + 1;
+        if (selectedBrand === 'ALL' || (p.brand || 'Unbranded').trim() === selectedBrand) {
+          counts.ALL = (counts.ALL || 0) + 1;
+          const sub = p.subcategory || 'General';
+          subs.add(sub);
+          counts[sub] = (counts[sub] || 0) + 1;
+        }
       }
     });
 
@@ -40,32 +65,54 @@ export const QuotationCatalogGrid = () => {
       availableSubcategories: ['ALL', ...Array.from(subs)],
       subcategoryCounts: counts
     };
-  }, [products, selectedCategory]);
+  }, [products, selectedCategory, selectedBrand]);
+
+  // Helper to normalize search text: handles '', inch, and casing
+  const normalizeText = (text) => {
+    if (!text) return '';
+    return text
+      .toLowerCase()
+      .replace(/''/g, '"') // Normalize double single-quotes ('') to (")
+      .replace(/(\d+)\s*inch/g, '$1"') // Normalize '1 inch' to '1"'
+      .trim();
+  };
 
   // Filtered products
   const filteredProducts = useMemo(() => {
+    const rawQuery = searchQuery.trim();
+    const normalizedQuery = normalizeText(rawQuery);
+    const queryTokens = normalizedQuery ? normalizedQuery.split(/\s+/).filter(Boolean) : [];
+
     return products.filter((p) => {
       if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
         return false;
       }
+      if (selectedBrand !== 'ALL') {
+        const pBrand = (p.brand || 'Unbranded').trim();
+        if (pBrand !== selectedBrand) return false;
+      }
       if (selectedSubcategory !== 'ALL' && p.subcategory !== selectedSubcategory) {
         return false;
       }
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchName = p.name?.toLowerCase().includes(q);
-        const matchBrand = p.brand?.toLowerCase().includes(q);
-        const matchCategory = p.category?.toLowerCase().includes(q);
-        const matchSubcategory = p.subcategory?.toLowerCase().includes(q);
-        const matchVariant = p.variants?.some((v) => 
-          v.size?.toLowerCase().includes(q) || 
-          v.barcode?.toLowerCase().includes(q)
+      // Multi-token Smart Search (Matches brand + name + size across tokens)
+      if (queryTokens.length > 0) {
+        const combinedText = normalizeText(
+          `${p.name || ''} ${p.brand || ''} ${p.category || ''} ${p.subcategory || ''} ${p.hsnCode || ''} ${(p.variants || []).map((v) => `${v.size || ''} ${v.barcode || ''}`).join(' ')}`
         );
-        return matchName || matchBrand || matchCategory || matchSubcategory || matchVariant;
+        return queryTokens.every((token) => combinedText.includes(token));
       }
       return true;
     });
-  }, [products, selectedCategory, selectedSubcategory, searchQuery]);
+  }, [products, selectedCategory, selectedBrand, selectedSubcategory, searchQuery]);
+
+  // Check if a variant size matches search query for visual highlighting
+  const isVariantMatched = (size, barcode) => {
+    if (!searchQuery.trim()) return false;
+    const normalizedQuery = normalizeText(searchQuery);
+    const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+    const normalizedVariant = normalizeText(`${size || ''} ${barcode || ''}`);
+    return queryTokens.some((token) => normalizedVariant.includes(token));
+  };
 
   // Handle barcode scanner
   const handleSearchKeyDown = (e) => {
@@ -91,144 +138,181 @@ export const QuotationCatalogGrid = () => {
   return (
     <div className="flex flex-col h-full bg-slate-100/80 rounded-2xl border border-slate-200/90 p-4">
       
-      {/* Top Search & Category Selection Bar */}
-      <div className="space-y-3 mb-3">
+      {/* Ultra-Compact Bold POS Control Bar (Takes minimal height, maximizes product grid space) */}
+      <div className="bg-white rounded-2xl border border-slate-300 p-2.5 sm:p-3 shadow-xs space-y-2 mb-3 shrink-0">
         
-        {/* Search Input */}
-        <div className="relative">
-          <Search className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Scan barcode or search products & sizes for quotation..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            className="w-full pl-12 pr-16 py-3 bg-white rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm sm:text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all shadow-xs"
-          />
-          {searchQuery && (
+        {/* ROW 1: Integrated Search Input + Bold Category Tabs */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+          
+          {/* Search Box */}
+          <div className="relative flex-1 min-w-[260px]">
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Scan barcode or search quotation item, brand, size (e.g. supreme elbow, 1'', leo 3/4)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              className="w-full pl-10 pr-14 py-2 bg-slate-50 focus:bg-white rounded-xl border border-slate-300 text-slate-950 placeholder:text-slate-400 text-xs sm:text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-slate-600 hover:text-slate-950 bg-slate-200 hover:bg-slate-300 px-2 py-0.5 rounded-md"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Category Tabs (Compact, High-Contrast & Bold) */}
+          <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-md"
+              onClick={() => {
+                setSelectedCategory('ALL');
+                setSelectedBrand('ALL');
+                setSelectedSubcategory('ALL');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition-all ${
+                selectedCategory === 'ALL'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/60'
+              }`}
             >
-              Clear
+              <Layers className="w-3.5 h-3.5" />
+              <span>All ({products.length})</span>
             </button>
-          )}
+
+            <button
+              onClick={() => {
+                setSelectedCategory('Electrical');
+                setSelectedBrand('ALL');
+                setSelectedSubcategory('ALL');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition-all ${
+                selectedCategory === 'Electrical'
+                  ? 'bg-amber-500 text-slate-950 shadow-xs ring-1 ring-amber-400 font-black'
+                  : 'text-amber-950 hover:bg-amber-100/70'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
+              <span>⚡ Electrical</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedCategory('Plumbing');
+                setSelectedBrand('ALL');
+                setSelectedSubcategory('ALL');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition-all ${
+                selectedCategory === 'Plumbing'
+                  ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-500 font-black'
+                  : 'text-blue-950 hover:bg-blue-100/70'
+              }`}
+            >
+              <Droplets className="w-3.5 h-3.5 fill-blue-500 text-blue-600" />
+              <span>🚰 Plumbing</span>
+            </button>
+          </div>
+
         </div>
 
-        {/* Main Category Tabs */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <button
-            onClick={() => {
-              setSelectedCategory('ALL');
-              setSelectedSubcategory('ALL');
-            }}
-            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm sm:text-base font-black transition-all ${
-              selectedCategory === 'ALL'
-                ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15'
-                : 'bg-white text-slate-800 border border-slate-300 hover:bg-slate-50'
-            }`}
-          >
-            <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span>All Products</span>
-          </button>
+        {/* ROW 2: Inline Dropdowns for Brand & Subcategory + Reset button */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+          
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Brand Dropdown */}
+            {availableBrands.length > 1 && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 px-2.5 py-1 rounded-lg">
+                <Tag className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">Brand:</span>
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  className="bg-transparent text-xs font-black text-slate-900 focus:outline-none cursor-pointer pr-1"
+                >
+                  {availableBrands.map((b) => (
+                    <option key={b} value={b} className="font-bold">
+                      {b === 'ALL' ? `All Brands (${brandCounts.ALL || 0})` : `${b} (${brandCounts[b] || 0})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-          <button
-            onClick={() => {
-              setSelectedCategory('Electrical');
-              setSelectedSubcategory('ALL');
-            }}
-            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm sm:text-base font-black transition-all ${
-              selectedCategory === 'Electrical'
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25 ring-2 ring-amber-400'
-                : 'bg-white text-amber-950 border border-amber-300 hover:bg-amber-50'
-            }`}
-          >
-            <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-500 text-amber-600" />
-            <span>⚡ Electrical</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setSelectedCategory('Plumbing');
-              setSelectedSubcategory('ALL');
-            }}
-            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm sm:text-base font-black transition-all ${
-              selectedCategory === 'Plumbing'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 ring-2 ring-blue-400'
-                : 'bg-white text-blue-950 border border-blue-300 hover:bg-blue-50'
-            }`}
-          >
-            <Droplets className="w-4 h-4 sm:w-5 sm:h-5 fill-blue-500 text-blue-600" />
-            <span>🚰 Plumbing</span>
-          </button>
-        </div>
-
-        {/* Hybrid Subcategory Selector Box: Quick Dropdown + Wrapped Multi-Row Pills */}
-        {availableSubcategories.length > 2 && (
-          <div className="bg-white/80 p-2.5 rounded-xl border border-slate-200 shadow-2xs space-y-2">
-            
-            {/* Subcategory Bar Header with Dropdown & Expand Button */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-slate-100">
-              <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+            {/* Subcategory Dropdown */}
+            {availableSubcategories.length > 2 && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 px-2.5 py-1 rounded-lg">
                 <Filter className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                <label className="text-xs font-black text-slate-700 whitespace-nowrap">
-                  Subcategory:
-                </label>
-                {/* Option 1: Quick Dropdown Menu */}
+                <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">Subcategory:</span>
                 <select
                   value={selectedSubcategory}
                   onChange={(e) => setSelectedSubcategory(e.target.value)}
-                  className="flex-1 max-w-xs px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  className="bg-transparent text-xs font-black text-slate-900 focus:outline-none cursor-pointer pr-1 max-w-[200px] truncate"
                 >
                   {availableSubcategories.map((sub) => (
-                    <option key={sub} value={sub}>
+                    <option key={sub} value={sub} className="font-bold">
                       {sub === 'ALL' ? `All Subcategories (${subcategoryCounts.ALL || 0})` : `${sub} (${subcategoryCounts[sub] || 0})`}
                     </option>
                   ))}
                 </select>
               </div>
+            )}
 
-              {/* Option 2: Expand / Collapse Toggle if many subcategories */}
-              {availableSubcategories.length > 8 && (
+            {/* Active Filter Clear Tag */}
+            {(selectedBrand !== 'ALL' || selectedSubcategory !== 'ALL') && (
+              <button
+                onClick={() => {
+                  setSelectedBrand('ALL');
+                  setSelectedSubcategory('ALL');
+                }}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-black text-rose-700 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors"
+                title="Reset Brand & Subcategory filters"
+              >
+                <span>Reset Filters ✕</span>
+              </button>
+            )}
+          </div>
+
+          {/* Collapsible Pills Toggle */}
+          {availableSubcategories.length > 3 && (
+            <button
+              onClick={() => setIsSubcategoriesExpanded(!isSubcategoriesExpanded)}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-black text-blue-700 hover:text-blue-900 hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors ml-auto"
+            >
+              <span>{isSubcategoriesExpanded ? 'Hide Pills ▲' : 'Show Quick Pills ▼'}</span>
+            </button>
+          )}
+
+        </div>
+
+        {/* Collapsible Quick Pills Drawer (Only shown if toggled) */}
+        {isSubcategoriesExpanded && availableSubcategories.length > 2 && (
+          <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-1.5 animate-in fade-in duration-150">
+            {availableSubcategories.map((sub) => {
+              const isSelected = selectedSubcategory === sub;
+              const count = subcategoryCounts[sub] || 0;
+
+              return (
                 <button
-                  onClick={() => setIsSubcategoriesExpanded(!isSubcategoriesExpanded)}
-                  className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-blue-700 hover:text-blue-900 hover:bg-blue-50 rounded-md transition-colors"
+                  key={sub}
+                  onClick={() => setSelectedSubcategory(sub)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                    isSelected
+                      ? 'bg-blue-700 text-white shadow-xs ring-1 ring-blue-700'
+                      : 'bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-950 border border-slate-200'
+                  }`}
                 >
-                  <span>{isSubcategoriesExpanded ? 'Show Less' : `+ More (${availableSubcategories.length - 8})`}</span>
-                  {isSubcategoriesExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  <span>{sub === 'ALL' ? 'All' : sub}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${
+                    isSelected ? 'bg-blue-950 text-white' : 'bg-white text-slate-700'
+                  }`}>
+                    {count}
+                  </span>
                 </button>
-              )}
-            </div>
-
-            {/* Option 2: Wrapped Multi-Row Pill Buttons (No swiping required!) */}
-            <div className="flex flex-wrap gap-1.5 pt-0.5">
-              {visibleSubcategories.map((sub) => {
-                const isSelected = selectedSubcategory === sub;
-                const count = subcategoryCounts[sub] || 0;
-
-                return (
-                  <button
-                    key={sub}
-                    onClick={() => setSelectedSubcategory(sub)}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                      isSelected
-                        ? 'bg-blue-700 text-white shadow-xs ring-1 ring-blue-700'
-                        : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 hover:text-slate-950'
-                    }`}
-                  >
-                    <span>{sub === 'ALL' ? 'All' : sub}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${
-                      isSelected 
-                        ? 'bg-blue-900 text-white' 
-                        : 'bg-slate-100 text-slate-500'
-                    }`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
+              );
+            })}
           </div>
         )}
 
@@ -248,7 +332,7 @@ export const QuotationCatalogGrid = () => {
             <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-sm mt-1 mb-4">
               {products.length === 0 
                 ? "Your database has no products yet. Click below to load items."
-                : `No products matching "${searchQuery}" in ${selectedCategory}.`}
+                : `No products matching "${searchQuery}" in ${selectedCategory}${selectedBrand !== 'ALL' ? ` (${selectedBrand})` : ''}.`}
             </p>
             {products.length === 0 && (
               <button
@@ -265,12 +349,18 @@ export const QuotationCatalogGrid = () => {
             {filteredProducts.map((product) => {
               const isElectrical = product.category === 'Electrical';
               const variants = product.variants || [];
+              const brandTheme = getBrandTheme(product.brand, settings?.brandColors);
 
               return (
                 <div
                   key={product.id || product.name}
-                  className="bg-white rounded-xl border border-slate-200 hover:border-blue-500 p-4 shadow-xs hover:shadow-md transition-all group flex flex-col"
+                  className={`bg-white rounded-xl border border-slate-200 ${brandTheme.cardBorder} p-4 pt-4.5 shadow-xs hover:shadow-md transition-all group flex flex-col relative overflow-hidden`}
                 >
+                  {/* Subtle top brand color accent stripe */}
+                  {product.brand && (
+                    <div className={`absolute top-0 left-0 right-0 h-1 ${brandTheme.cardTopBar}`} />
+                  )}
+
                   <div className="mb-2.5">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <span
@@ -284,8 +374,9 @@ export const QuotationCatalogGrid = () => {
                         {product.subcategory || product.category}
                       </span>
                       {product.brand && (
-                        <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
-                          {product.brand}
+                        <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-md border shadow-2xs ${brandTheme.badge}`}>
+                          <Tag className="w-3 h-3" />
+                          <span>{product.brand}</span>
                         </span>
                       )}
                     </div>
@@ -307,22 +398,29 @@ export const QuotationCatalogGrid = () => {
                     </div>
                     
                     <div className="flex flex-wrap gap-2 max-h-52 overflow-y-auto pr-1">
-                      {variants.map((v, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => addToQuotationCart(product, v)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-blue-600 text-slate-800 hover:text-white border border-slate-300 hover:border-blue-600 rounded-lg text-xs sm:text-sm font-bold transition-all group/btn active:scale-95 shadow-2xs"
-                          title={`Click to add ${product.name} (${v.size}) to quotation`}
-                        >
-                          <span className="font-bold text-slate-950 group-hover/btn:text-white">
-                            {v.size}
-                          </span>
-                          <span className="text-blue-700 group-hover/btn:text-white font-black font-mono-numbers">
-                            {formatCurrency(v.price)}
-                          </span>
-                          <Plus className="w-3.5 h-3.5 text-slate-500 group-hover/btn:text-white font-bold" />
-                        </button>
-                      ))}
+                      {variants.map((v, idx) => {
+                        const isMatch = isVariantMatched(v.size, v.barcode);
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => addToQuotationCart(product, v)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all group/btn active:scale-95 shadow-2xs ${
+                              isMatch
+                                ? 'bg-amber-100 text-amber-950 border-2 border-amber-500 ring-2 ring-amber-400/50 font-black shadow-xs'
+                                : 'bg-slate-50 hover:bg-blue-600 text-slate-800 hover:text-white border border-slate-300 hover:border-blue-600'
+                            }`}
+                            title={`Click to add ${product.name} (${v.size}) to quotation`}
+                          >
+                            <span className={isMatch ? 'text-amber-950 font-black' : 'font-bold text-slate-950 group-hover/btn:text-white'}>
+                              {v.size}
+                            </span>
+                            <span className={isMatch ? 'text-amber-900 font-black font-mono-numbers' : 'text-blue-700 group-hover/btn:text-white font-black font-mono-numbers'}>
+                              {formatCurrency(v.price)}
+                            </span>
+                            <Plus className={isMatch ? 'w-3.5 h-3.5 text-amber-800 font-bold' : 'w-3.5 h-3.5 text-slate-500 group-hover/btn:text-white font-bold'} />
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 

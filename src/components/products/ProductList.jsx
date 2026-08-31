@@ -17,7 +17,9 @@ import {
   ChevronUp,
   AlertTriangle,
   X,
-  Barcode
+  Barcode,
+  Copy,
+  Tag
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatCurrency, formatNumber } from '../../utils/formatters';
@@ -25,21 +27,27 @@ import { exportProductsToExcel, downloadSampleExcelTemplate } from '../../utils/
 import { ProductModal } from './ProductModal';
 import { ExcelImportModal } from './ExcelImportModal';
 import { BarcodePrintModal } from './BarcodePrintModal';
+import { BulkBrandCloneModal } from './BulkBrandCloneModal';
+import { getBrandTheme } from '../../utils/brandColorHelper';
 
 export const ProductList = () => {
   const { 
     products, 
     handleDeleteProduct, 
     seedStarterProducts, 
-    isLoadingProducts 
+    isLoadingProducts,
+    settings
   } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedBrand, setSelectedBrand] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isCloningProduct, setIsCloningProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
+  const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
   const [expandedRowId, setExpandedRowId] = useState(null);
 
   const categoryCounts = useMemo(() => {
@@ -48,6 +56,18 @@ export const ProductList = () => {
       plumbing: products.filter((p) => p.category === 'Plumbing').length,
     };
   }, [products]);
+
+  // Extract unique brands
+  const availableBrands = useMemo(() => {
+    const brandMap = new Map();
+    products.forEach((p) => {
+      if (selectedCategory === 'ALL' || p.category === selectedCategory) {
+        const b = (p.brand || 'Unbranded').trim();
+        brandMap.set(b, (brandMap.get(b) || 0) + 1);
+      }
+    });
+    return Array.from(brandMap.entries()).map(([name, count]) => ({ name, count }));
+  }, [products, selectedCategory]);
 
   const handleDelete = (id, name) => {
     if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
@@ -61,6 +81,10 @@ export const ProductList = () => {
       if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
         return false;
       }
+      if (selectedBrand !== 'ALL') {
+        const pBrand = (p.brand || 'Unbranded').trim();
+        if (pBrand !== selectedBrand) return false;
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = p.name?.toLowerCase().includes(q);
@@ -72,15 +96,23 @@ export const ProductList = () => {
       }
       return true;
     });
-  }, [products, selectedCategory, searchQuery]);
+  }, [products, selectedCategory, selectedBrand, searchQuery]);
 
   const handleEdit = (product) => {
     setEditingProduct(product);
+    setIsCloningProduct(false);
+    setIsProductModalOpen(true);
+  };
+
+  const handleDuplicate = (product) => {
+    setEditingProduct(product);
+    setIsCloningProduct(true);
     setIsProductModalOpen(true);
   };
 
   const handleAddNew = () => {
     setEditingProduct(null);
+    setIsCloningProduct(false);
     setIsProductModalOpen(true);
   };
 
@@ -99,11 +131,22 @@ export const ProductList = () => {
             <span>Product Master & Size Inventory</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">
-            Manage your Electrical and Plumbing catalog, multi-size rates, and stock.
+            Manage your Electrical and Plumbing catalog, multi-brand rates, and stock.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Clone Brand Catalog Button */}
+          <button
+            onClick={() => setIsCloneModalOpen(true)}
+            disabled={products.length === 0}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-300 rounded-xl text-xs sm:text-sm font-bold transition-all disabled:opacity-50 shadow-2xs"
+            title="Clone entire brand catalog to a new brand (e.g. Supreme, Finolex, Havells)"
+          >
+            <Copy className="w-4 h-4 text-indigo-700" />
+            <span>Clone Brand Catalog</span>
+          </button>
+
           {/* Print Barcodes Button */}
           <button
             onClick={() => setIsBarcodeModalOpen(true)}
@@ -151,7 +194,10 @@ export const ProductList = () => {
         
         <div className="flex items-center gap-1.5 bg-slate-200/70 p-1.5 rounded-xl border border-slate-300/60 w-full sm:w-auto">
           <button
-            onClick={() => setSelectedCategory('ALL')}
+            onClick={() => {
+              setSelectedCategory('ALL');
+              setSelectedBrand('ALL');
+            }}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs sm:text-sm font-black transition-all ${
               selectedCategory === 'ALL'
                 ? 'bg-white text-slate-900 shadow-xs'
@@ -163,7 +209,10 @@ export const ProductList = () => {
           </button>
 
           <button
-            onClick={() => setSelectedCategory('Electrical')}
+            onClick={() => {
+              setSelectedCategory('Electrical');
+              setSelectedBrand('ALL');
+            }}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs sm:text-sm font-black transition-all ${
               selectedCategory === 'Electrical'
                 ? 'bg-amber-500 text-slate-950 shadow-xs'
@@ -175,7 +224,10 @@ export const ProductList = () => {
           </button>
 
           <button
-            onClick={() => setSelectedCategory('Plumbing')}
+            onClick={() => {
+              setSelectedCategory('Plumbing');
+              setSelectedBrand('ALL');
+            }}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs sm:text-sm font-black transition-all ${
               selectedCategory === 'Plumbing'
                 ? 'bg-blue-600 text-white shadow-xs'
@@ -206,6 +258,46 @@ export const ProductList = () => {
           )}
         </div>
       </div>
+
+      {/* Brand Filter Pills Bar */}
+      {availableBrands.length > 1 && (
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 mr-1">
+            <Tag className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Filter by Brand:</span>
+          </div>
+          
+          <button
+            onClick={() => setSelectedBrand('ALL')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              selectedBrand === 'ALL'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            All Brands ({products.length})
+          </button>
+
+          {availableBrands.map((b) => (
+            <button
+              key={b.name}
+              onClick={() => setSelectedBrand(b.name)}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                selectedBrand === b.name
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <span>{b.name}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${
+                selectedBrand === b.name ? 'bg-indigo-800 text-white' : 'bg-slate-200 text-slate-600'
+              }`}>
+                {b.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         {isLoadingProducts ? (
@@ -278,7 +370,14 @@ export const ProductList = () => {
                         </td>
 
                         <td className="py-3.5 px-3 font-bold text-slate-800">
-                          {prod.brand || '-'}
+                          {prod.brand ? (
+                            <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-md border shadow-2xs ${getBrandTheme(prod.brand, settings?.brandColors).badge}`}>
+                              <Tag className="w-3 h-3" />
+                              <span>{prod.brand}</span>
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 font-bold">-</span>
+                          )}
                         </td>
 
                         <td className="py-3.5 px-3">
@@ -307,20 +406,27 @@ export const ProductList = () => {
                         </td>
 
                         <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleDuplicate(prod)}
+                              className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                              title={`Duplicate "${prod.name}" to another Brand`}
+                            >
+                              <Copy className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-emerald-600" />
+                            </button>
                             <button
                               onClick={() => handleEdit(prod)}
                               className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Edit product"
                             >
-                              <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <Edit3 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                             </button>
                             <button
                               onClick={() => handleDelete(prod.id, prod.name)}
                               className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                               title="Delete product"
                             >
-                              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <Trash2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                             </button>
                           </div>
                         </td>
@@ -336,10 +442,9 @@ export const ProductList = () => {
                               </div>
                               <table className="w-full text-left text-xs border-collapse">
                                 <thead>
-                                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 font-semibold">
+                                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-black">
                                     <th className="py-2 px-3">Size / Spec</th>
-                                    <th className="py-2 px-3 text-right">Selling Rate (₹)</th>
-                                    <th className="py-2 px-3 text-right">MRP (₹)</th>
+                                    <th className="py-2 px-3 text-right">MRP / List Rate (₹)</th>
                                     <th className="py-2 px-3 text-right">Stock</th>
                                     <th className="py-2 px-3">Unit</th>
                                     <th className="py-2 px-3">Barcode / SKU</th>
@@ -349,8 +454,7 @@ export const ProductList = () => {
                                   {variants.map((v, vIndex) => (
                                     <tr key={vIndex} className="hover:bg-slate-50">
                                       <td className="py-2 px-3 font-bold text-blue-800">{v.size}</td>
-                                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">{formatCurrency(v.price)}</td>
-                                      <td className="py-2 px-3 text-right font-mono text-slate-500">{formatCurrency(v.mrp || v.price)}</td>
+                                      <td className="py-2 px-3 text-right font-mono font-black text-slate-900">{formatCurrency(v.mrp || v.price)}</td>
                                       <td className="py-2 px-3 text-right font-mono">
                                         <span className={`px-2 py-0.5 rounded font-bold ${
                                           v.stock <= 10 ? 'bg-rose-100 text-rose-800' : 'text-slate-700'
@@ -358,7 +462,7 @@ export const ProductList = () => {
                                           {v.stock}
                                         </span>
                                       </td>
-                                      <td className="py-2 px-3 text-slate-600">{v.unit}</td>
+                                      <td className="py-2 px-3 text-slate-600 font-bold">{v.unit}</td>
                                       <td className="py-2 px-3 text-slate-400 font-mono">{v.barcode || '-'}</td>
                                     </tr>
                                   ))}
@@ -377,11 +481,21 @@ export const ProductList = () => {
         )}
       </div>
 
-      {/* Add / Edit Product Modal */}
+      {/* Add / Edit / Clone Product Modal */}
       <ProductModal
         isOpen={isProductModalOpen}
-        onClose={() => setIsProductModalOpen(false)}
+        onClose={() => {
+          setIsProductModalOpen(false);
+          setIsCloningProduct(false);
+        }}
         editingProduct={editingProduct}
+        isCloning={isCloningProduct}
+      />
+
+      {/* Bulk Brand Catalog Cloner Modal */}
+      <BulkBrandCloneModal
+        isOpen={isCloneModalOpen}
+        onClose={() => setIsCloneModalOpen(false)}
       />
 
       {/* Excel Importer Modal */}

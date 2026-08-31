@@ -6,6 +6,7 @@ import { QuotationScreen } from './components/quotations/QuotationScreen';
 import { ProductList } from './components/products/ProductList';
 import { InvoiceHistory } from './components/invoices/InvoiceHistory';
 import { DashboardStats } from './components/dashboard/DashboardStats';
+import { GSTReportsView } from './components/reports/GSTReportsView';
 import { SettingsView } from './components/settings/SettingsView';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
@@ -24,6 +25,7 @@ export function App() {
         {currentTab === 'products' && <ProductList />}
         {currentTab === 'invoices' && <InvoiceHistory />}
         {currentTab === 'dashboard' && <DashboardStats />}
+        {currentTab === 'gst-reports' && <GSTReportsView />}
         {currentTab === 'settings' && <SettingsView />}
       </main>
 

@@ -40,3 +40,56 @@ export const generateInvoiceNumber = (sequence = 1, prefix = 'RG-') => {
   const seqStr = String(sequence).padStart(4, '0');
   return `${prefix}${year}${month}-${seqStr}`;
 };
+
+/**
+ * Capitalizes the first letter of each word and any letter after spaces, hyphens, slashes, brackets.
+ * Ideal for live input onChange handlers across the app.
+ */
+export const capitalizeInput = (value) => {
+  if (!value || typeof value !== 'string') return value || '';
+  return value.replace(/(^|[\s\-\/\(\[\{])([a-z])/g, (match, separator, letter) => {
+    return separator + letter.toUpperCase();
+  });
+};
+
+/**
+ * Standard title case formatter that preserves technical acronyms like PVC, cPVC, uPVC, LED, etc.
+ */
+export const toTitleCase = (str) => {
+  if (!str || typeof str !== 'string') return str || '';
+  
+  const acronyms = {
+    'CPVC': 'cPVC',
+    'UPVC': 'uPVC',
+    'RPVC': 'rPVC',
+    'PVC': 'PVC',
+    'SWR': 'SWR',
+    'HDPE': 'HDPE',
+    'GI': 'GI',
+    'MS': 'MS',
+    'SS': 'SS',
+    'PTMT': 'PTMT',
+    'LED': 'LED',
+    'MCB': 'MCB',
+    'DB': 'DB',
+    'SPN': 'SPN',
+    'DP': 'DP',
+    'TPN': 'TPN',
+    'FRLS': 'FRLS',
+    'FR': 'FR',
+    'LSH': 'LSH',
+    'DOL': 'DOL',
+    'HP': 'HP',
+    'KW': 'KW',
+    'ISI': 'ISI',
+    'GST': 'GST',
+    'HSN': 'HSN'
+  };
+
+  return str.replace(/[a-zA-Z0-9]+/g, (word) => {
+    const upper = word.toUpperCase();
+    if (acronyms[upper]) return acronyms[upper];
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+};
+

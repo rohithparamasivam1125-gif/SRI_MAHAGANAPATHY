@@ -72,15 +72,15 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "ISI Certified Heavy PVC 90° Elbow (IS 7834)",
     variants: [
-      { size: "20 mm (100/pkt)", price: 6.50, mrp: 9.00, stock: 100, unit: "Pcs", barcode: "LEO-ELB-ISI-20" },
-      { size: "25 mm (50/pkt)", price: 9.80, mrp: 14.00, stock: 100, unit: "Pcs", barcode: "LEO-ELB-ISI-25" },
-      { size: "32 mm (60/pkt)", price: 13.70, mrp: 19.00, stock: 80, unit: "Pcs", barcode: "LEO-ELB-ISI-32" },
-      { size: "40 mm (25/pkt)", price: 20.50, mrp: 28.00, stock: 60, unit: "Pcs", barcode: "LEO-ELB-ISI-40" },
-      { size: "50 mm (15/pkt)", price: 31.80, mrp: 42.00, stock: 50, unit: "Pcs", barcode: "LEO-ELB-ISI-50" },
-      { size: "63 mm (70/pkt)", price: 47.90, mrp: 65.00, stock: 70, unit: "Pcs", barcode: "LEO-ELB-ISI-63" },
-      { size: "75 mm (40/pkt)", price: 70.00, mrp: 95.00, stock: 40, unit: "Pcs", barcode: "LEO-ELB-ISI-75" },
-      { size: "90 mm (20/pkt)", price: 113.00, mrp: 150.00, stock: 20, unit: "Pcs", barcode: "LEO-ELB-ISI-90" },
-      { size: "110 mm (12/pkt)", price: 180.00, mrp: 240.00, stock: 12, unit: "Pcs", barcode: "LEO-ELB-ISI-110" }
+      { size: "20 mm", price: 6.50, mrp: 9.00, stock: 100, unit: "Pcs", barcode: "LEO-ELB-ISI-20" },
+      { size: "25 mm", price: 9.80, mrp: 14.00, stock: 100, unit: "Pcs", barcode: "LEO-ELB-ISI-25" },
+      { size: "32 mm", price: 13.70, mrp: 19.00, stock: 80, unit: "Pcs", barcode: "LEO-ELB-ISI-32" },
+      { size: "40 mm", price: 20.50, mrp: 28.00, stock: 60, unit: "Pcs", barcode: "LEO-ELB-ISI-40" },
+      { size: "50 mm", price: 31.80, mrp: 42.00, stock: 50, unit: "Pcs", barcode: "LEO-ELB-ISI-50" },
+      { size: "63 mm", price: 47.90, mrp: 65.00, stock: 70, unit: "Pcs", barcode: "LEO-ELB-ISI-63" },
+      { size: "75 mm", price: 70.00, mrp: 95.00, stock: 40, unit: "Pcs", barcode: "LEO-ELB-ISI-75" },
+      { size: "90 mm", price: 113.00, mrp: 150.00, stock: 20, unit: "Pcs", barcode: "LEO-ELB-ISI-90" },
+      { size: "110 mm", price: 180.00, mrp: 240.00, stock: 12, unit: "Pcs", barcode: "LEO-ELB-ISI-110" }
     ]
   },
   {
@@ -92,15 +92,15 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "ISI Certified Heavy PVC 3-Way Equal Branch Tee (IS 7834)",
     variants: [
-      { size: "20 mm (80/pkt)", price: 8.60, mrp: 12.00, stock: 80, unit: "Pcs", barcode: "LEO-TEE-ISI-20" },
-      { size: "25 mm (50/pkt)", price: 13.70, mrp: 18.00, stock: 50, unit: "Pcs", barcode: "LEO-TEE-ISI-25" },
-      { size: "32 mm (30/pkt)", price: 18.00, mrp: 25.00, stock: 30, unit: "Pcs", barcode: "LEO-TEE-ISI-32" },
-      { size: "40 mm (15/pkt)", price: 27.50, mrp: 38.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-ISI-40" },
-      { size: "50 mm (10/pkt)", price: 46.00, mrp: 62.00, stock: 10, unit: "Pcs", barcode: "LEO-TEE-ISI-50" },
-      { size: "63 mm (40/pkt)", price: 65.00, mrp: 88.00, stock: 40, unit: "Pcs", barcode: "LEO-TEE-ISI-63" },
-      { size: "75 mm (20/pkt)", price: 97.00, mrp: 130.00, stock: 20, unit: "Pcs", barcode: "LEO-TEE-ISI-75" },
-      { size: "90 mm (15/pkt)", price: 156.00, mrp: 210.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-ISI-90" },
-      { size: "110 mm (8/pkt)", price: 244.00, mrp: 320.00, stock: 8, unit: "Pcs", barcode: "LEO-TEE-ISI-110" }
+      { size: "20 mm", price: 8.60, mrp: 12.00, stock: 80, unit: "Pcs", barcode: "LEO-TEE-ISI-20" },
+      { size: "25 mm", price: 13.70, mrp: 18.00, stock: 50, unit: "Pcs", barcode: "LEO-TEE-ISI-25" },
+      { size: "32 mm", price: 18.00, mrp: 25.00, stock: 30, unit: "Pcs", barcode: "LEO-TEE-ISI-32" },
+      { size: "40 mm", price: 27.50, mrp: 38.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-ISI-40" },
+      { size: "50 mm", price: 46.00, mrp: 62.00, stock: 10, unit: "Pcs", barcode: "LEO-TEE-ISI-50" },
+      { size: "63 mm", price: 65.00, mrp: 88.00, stock: 40, unit: "Pcs", barcode: "LEO-TEE-ISI-63" },
+      { size: "75 mm", price: 97.00, mrp: 130.00, stock: 20, unit: "Pcs", barcode: "LEO-TEE-ISI-75" },
+      { size: "90 mm", price: 156.00, mrp: 210.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-ISI-90" },
+      { size: "110 mm", price: 244.00, mrp: 320.00, stock: 8, unit: "Pcs", barcode: "LEO-TEE-ISI-110" }
     ]
   },
   {
@@ -112,10 +112,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Agricultural irrigation PVC 90° elbow",
     variants: [
-      { size: "63 mm (70/pkt)", price: 40.00, mrp: 55.00, stock: 70, unit: "Pcs", barcode: "LEO-ELB-AGRI-63" },
-      { size: "75 mm (40/pkt)", price: 50.00, mrp: 68.00, stock: 40, unit: "Pcs", barcode: "LEO-ELB-AGRI-75" },
-      { size: "90 mm (25/pkt)", price: 70.00, mrp: 95.00, stock: 25, unit: "Pcs", barcode: "LEO-ELB-AGRI-90" },
-      { size: "110 mm (12/pkt)", price: 120.00, mrp: 160.00, stock: 12, unit: "Pcs", barcode: "LEO-ELB-AGRI-110" }
+      { size: "63 mm", price: 40.00, mrp: 55.00, stock: 70, unit: "Pcs", barcode: "LEO-ELB-AGRI-63" },
+      { size: "75 mm", price: 50.00, mrp: 68.00, stock: 40, unit: "Pcs", barcode: "LEO-ELB-AGRI-75" },
+      { size: "90 mm", price: 70.00, mrp: 95.00, stock: 25, unit: "Pcs", barcode: "LEO-ELB-AGRI-90" },
+      { size: "110 mm", price: 120.00, mrp: 160.00, stock: 12, unit: "Pcs", barcode: "LEO-ELB-AGRI-110" }
     ]
   },
   {
@@ -127,10 +127,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Agricultural irrigation PVC 3-way tee",
     variants: [
-      { size: "63 mm (40/pkt)", price: 54.00, mrp: 72.00, stock: 40, unit: "Pcs", barcode: "LEO-TEE-AGRI-63" },
-      { size: "75 mm (25/pkt)", price: 65.00, mrp: 88.00, stock: 25, unit: "Pcs", barcode: "LEO-TEE-AGRI-75" },
-      { size: "90 mm (15/pkt)", price: 95.00, mrp: 130.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-AGRI-90" },
-      { size: "110 mm (8/pkt)", price: 160.00, mrp: 215.00, stock: 8, unit: "Pcs", barcode: "LEO-TEE-AGRI-110" }
+      { size: "63 mm", price: 54.00, mrp: 72.00, stock: 40, unit: "Pcs", barcode: "LEO-TEE-AGRI-63" },
+      { size: "75 mm", price: 65.00, mrp: 88.00, stock: 25, unit: "Pcs", barcode: "LEO-TEE-AGRI-75" },
+      { size: "90 mm", price: 95.00, mrp: 130.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-AGRI-90" },
+      { size: "110 mm", price: 160.00, mrp: 215.00, stock: 8, unit: "Pcs", barcode: "LEO-TEE-AGRI-110" }
     ]
   },
   {
@@ -142,10 +142,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Light Weight PVC 90° elbow",
     variants: [
-      { size: "63 mm (70/pkt)", price: 34.20, mrp: 46.00, stock: 70, unit: "Pcs", barcode: "LEO-ELB-LW-63" },
-      { size: "75 mm (40/pkt)", price: 42.80, mrp: 58.00, stock: 40, unit: "Pcs", barcode: "LEO-ELB-LW-75" },
-      { size: "90 mm (25/pkt)", price: 64.00, mrp: 86.00, stock: 25, unit: "Pcs", barcode: "LEO-ELB-LW-90" },
-      { size: "110 mm (12/pkt)", price: 103.00, mrp: 140.00, stock: 12, unit: "Pcs", barcode: "LEO-ELB-LW-110" }
+      { size: "63 mm", price: 34.20, mrp: 46.00, stock: 70, unit: "Pcs", barcode: "LEO-ELB-LW-63" },
+      { size: "75 mm", price: 42.80, mrp: 58.00, stock: 40, unit: "Pcs", barcode: "LEO-ELB-LW-75" },
+      { size: "90 mm", price: 64.00, mrp: 86.00, stock: 25, unit: "Pcs", barcode: "LEO-ELB-LW-90" },
+      { size: "110 mm", price: 103.00, mrp: 140.00, stock: 12, unit: "Pcs", barcode: "LEO-ELB-LW-110" }
     ]
   },
   {
@@ -157,10 +157,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Light Weight PVC 3-way equal tee",
     variants: [
-      { size: "63 mm (40/pkt)", price: 46.20, mrp: 62.00, stock: 40, unit: "Pcs", barcode: "LEO-TEE-LW-63" },
-      { size: "75 mm (25/pkt)", price: 55.60, mrp: 75.00, stock: 25, unit: "Pcs", barcode: "LEO-TEE-LW-75" },
-      { size: "90 mm (15/pkt)", price: 88.00, mrp: 120.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-LW-90" },
-      { size: "110 mm (8/pkt)", price: 135.00, mrp: 180.00, stock: 8, unit: "Pcs", barcode: "LEO-TEE-LW-110" }
+      { size: "63 mm", price: 46.20, mrp: 62.00, stock: 40, unit: "Pcs", barcode: "LEO-TEE-LW-63" },
+      { size: "75 mm", price: 55.60, mrp: 75.00, stock: 25, unit: "Pcs", barcode: "LEO-TEE-LW-75" },
+      { size: "90 mm", price: 88.00, mrp: 120.00, stock: 15, unit: "Pcs", barcode: "LEO-TEE-LW-90" },
+      { size: "110 mm", price: 135.00, mrp: 180.00, stock: 8, unit: "Pcs", barcode: "LEO-TEE-LW-110" }
     ]
   },
   {
@@ -172,14 +172,14 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Male Threaded PVC solvent weld adaptor",
     variants: [
-      { size: "20 mm (100/pkt)", price: 4.40, mrp: 6.50, stock: 100, unit: "Pcs", barcode: "LEO-MTA-20" },
-      { size: "25 mm (50/pkt)", price: 5.80, mrp: 8.50, stock: 50, unit: "Pcs", barcode: "LEO-MTA-25" },
-      { size: "32 mm (50/pkt)", price: 9.00, mrp: 13.00, stock: 50, unit: "Pcs", barcode: "LEO-MTA-32" },
-      { size: "40 mm (40/pkt)", price: 13.70, mrp: 19.00, stock: 40, unit: "Pcs", barcode: "LEO-MTA-40" },
-      { size: "50 mm (15/pkt)", price: 21.00, mrp: 29.00, stock: 15, unit: "Pcs", barcode: "LEO-MTA-50" },
-      { size: "63 mm (120/pkt)", price: 33.00, mrp: 45.00, stock: 120, unit: "Pcs", barcode: "LEO-MTA-63" },
-      { size: "75 mm (80/pkt)", price: 42.80, mrp: 58.00, stock: 80, unit: "Pcs", barcode: "LEO-MTA-75" },
-      { size: "90 mm (40/pkt)", price: 66.00, mrp: 90.00, stock: 40, unit: "Pcs", barcode: "LEO-MTA-90" }
+      { size: "20 mm", price: 4.40, mrp: 6.50, stock: 100, unit: "Pcs", barcode: "LEO-MTA-20" },
+      { size: "25 mm", price: 5.80, mrp: 8.50, stock: 50, unit: "Pcs", barcode: "LEO-MTA-25" },
+      { size: "32 mm", price: 9.00, mrp: 13.00, stock: 50, unit: "Pcs", barcode: "LEO-MTA-32" },
+      { size: "40 mm", price: 13.70, mrp: 19.00, stock: 40, unit: "Pcs", barcode: "LEO-MTA-40" },
+      { size: "50 mm", price: 21.00, mrp: 29.00, stock: 15, unit: "Pcs", barcode: "LEO-MTA-50" },
+      { size: "63 mm", price: 33.00, mrp: 45.00, stock: 120, unit: "Pcs", barcode: "LEO-MTA-63" },
+      { size: "75 mm", price: 42.80, mrp: 58.00, stock: 80, unit: "Pcs", barcode: "LEO-MTA-75" },
+      { size: "90 mm", price: 66.00, mrp: 90.00, stock: 40, unit: "Pcs", barcode: "LEO-MTA-90" }
     ]
   },
   {
@@ -191,15 +191,15 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Female Threaded PVC solvent weld adaptor",
     variants: [
-      { size: "20 mm (100/pkt)", price: 4.50, mrp: 6.50, stock: 100, unit: "Pcs", barcode: "LEO-FTA-20" },
-      { size: "25 mm (50/pkt)", price: 6.40, mrp: 9.00, stock: 50, unit: "Pcs", barcode: "LEO-FTA-25" },
-      { size: "32 mm (50/pkt)", price: 8.60, mrp: 12.00, stock: 50, unit: "Pcs", barcode: "LEO-FTA-32" },
-      { size: "40 mm (25/pkt)", price: 13.70, mrp: 19.00, stock: 25, unit: "Pcs", barcode: "LEO-FTA-40" },
-      { size: "50 mm (15/pkt)", price: 23.00, mrp: 32.00, stock: 15, unit: "Pcs", barcode: "LEO-FTA-50" },
-      { size: "63 mm (100/pkt)", price: 35.00, mrp: 48.00, stock: 100, unit: "Pcs", barcode: "LEO-FTA-63" },
-      { size: "75 mm (70/pkt)", price: 51.00, mrp: 70.00, stock: 70, unit: "Pcs", barcode: "LEO-FTA-75" },
-      { size: "90 mm (40/pkt)", price: 80.00, mrp: 110.00, stock: 40, unit: "Pcs", barcode: "LEO-FTA-90" },
-      { size: "110 mm (20/pkt)", price: 130.00, mrp: 175.00, stock: 20, unit: "Pcs", barcode: "LEO-FTA-110" }
+      { size: "20 mm", price: 4.50, mrp: 6.50, stock: 100, unit: "Pcs", barcode: "LEO-FTA-20" },
+      { size: "25 mm", price: 6.40, mrp: 9.00, stock: 50, unit: "Pcs", barcode: "LEO-FTA-25" },
+      { size: "32 mm", price: 8.60, mrp: 12.00, stock: 50, unit: "Pcs", barcode: "LEO-FTA-32" },
+      { size: "40 mm", price: 13.70, mrp: 19.00, stock: 25, unit: "Pcs", barcode: "LEO-FTA-40" },
+      { size: "50 mm", price: 23.00, mrp: 32.00, stock: 15, unit: "Pcs", barcode: "LEO-FTA-50" },
+      { size: "63 mm", price: 35.00, mrp: 48.00, stock: 100, unit: "Pcs", barcode: "LEO-FTA-63" },
+      { size: "75 mm", price: 51.00, mrp: 70.00, stock: 70, unit: "Pcs", barcode: "LEO-FTA-75" },
+      { size: "90 mm", price: 80.00, mrp: 110.00, stock: 40, unit: "Pcs", barcode: "LEO-FTA-90" },
+      { size: "110 mm", price: 130.00, mrp: 175.00, stock: 20, unit: "Pcs", barcode: "LEO-FTA-110" }
     ]
   },
 
@@ -288,17 +288,17 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Plain solvent weld PVC pipe end cap (25mm to 180mm)",
     variants: [
-      { size: "25 mm (50/pkt)", price: 4.70, mrp: 7.00, stock: 50, unit: "Pcs", barcode: "LEO-CAP-25" },
-      { size: "32 mm (50/pkt)", price: 6.50, mrp: 9.00, stock: 50, unit: "Pcs", barcode: "LEO-CAP-32" },
-      { size: "40 mm (40/pkt)", price: 11.00, mrp: 15.00, stock: 40, unit: "Pcs", barcode: "LEO-CAP-40" },
-      { size: "50 mm (15/pkt)", price: 15.40, mrp: 21.00, stock: 15, unit: "Pcs", barcode: "LEO-CAP-50" },
-      { size: "63 mm (180/pkt)", price: 24.00, mrp: 33.00, stock: 180, unit: "Pcs", barcode: "LEO-CAP-63" },
-      { size: "75 mm (120/pkt)", price: 32.00, mrp: 44.00, stock: 120, unit: "Pcs", barcode: "LEO-CAP-75" },
-      { size: "90 mm (75/pkt)", price: 47.00, mrp: 64.00, stock: 75, unit: "Pcs", barcode: "LEO-CAP-90" },
-      { size: "110 mm (40/pkt)", price: 64.00, mrp: 88.00, stock: 40, unit: "Pcs", barcode: "LEO-CAP-110" },
-      { size: "140 mm (25/pkt)", price: 106.00, mrp: 145.00, stock: 25, unit: "Pcs", barcode: "LEO-CAP-140" },
-      { size: "160 mm (12/pkt)", price: 180.00, mrp: 240.00, stock: 12, unit: "Pcs", barcode: "LEO-CAP-160" },
-      { size: "180 mm (12/pkt)", price: 240.00, mrp: 320.00, stock: 12, unit: "Pcs", barcode: "LEO-CAP-180" }
+      { size: "25 mm", price: 4.70, mrp: 7.00, stock: 50, unit: "Pcs", barcode: "LEO-CAP-25" },
+      { size: "32 mm", price: 6.50, mrp: 9.00, stock: 50, unit: "Pcs", barcode: "LEO-CAP-32" },
+      { size: "40 mm", price: 11.00, mrp: 15.00, stock: 40, unit: "Pcs", barcode: "LEO-CAP-40" },
+      { size: "50 mm", price: 15.40, mrp: 21.00, stock: 15, unit: "Pcs", barcode: "LEO-CAP-50" },
+      { size: "63 mm", price: 24.00, mrp: 33.00, stock: 180, unit: "Pcs", barcode: "LEO-CAP-63" },
+      { size: "75 mm", price: 32.00, mrp: 44.00, stock: 120, unit: "Pcs", barcode: "LEO-CAP-75" },
+      { size: "90 mm", price: 47.00, mrp: 64.00, stock: 75, unit: "Pcs", barcode: "LEO-CAP-90" },
+      { size: "110 mm", price: 64.00, mrp: 88.00, stock: 40, unit: "Pcs", barcode: "LEO-CAP-110" },
+      { size: "140 mm", price: 106.00, mrp: 145.00, stock: 25, unit: "Pcs", barcode: "LEO-CAP-140" },
+      { size: "160 mm", price: 180.00, mrp: 240.00, stock: 12, unit: "Pcs", barcode: "LEO-CAP-160" },
+      { size: "180 mm", price: 240.00, mrp: 320.00, stock: 12, unit: "Pcs", barcode: "LEO-CAP-180" }
     ]
   },
   {
@@ -310,20 +310,20 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC pipe reducer fitting (All 14 sizes)",
     variants: [
-      { size: "32x25 (50/pkt)", price: 8.50, mrp: 12.00, stock: 50, unit: "Pcs", barcode: "LEO-RED-32-25" },
-      { size: "40x32 (30/pkt)", price: 13.70, mrp: 18.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-40-32" },
-      { size: "50x40 (20/pkt)", price: 19.70, mrp: 27.00, stock: 20, unit: "Pcs", barcode: "LEO-RED-50-40" },
-      { size: "63x32 (140/pkt)", price: 29.00, mrp: 40.00, stock: 140, unit: "Pcs", barcode: "LEO-RED-63-32" },
-      { size: "63x40 (120/pkt)", price: 29.00, mrp: 40.00, stock: 120, unit: "Pcs", barcode: "LEO-RED-63-40" },
-      { size: "63x50 (120/pkt)", price: 31.70, mrp: 43.00, stock: 120, unit: "Pcs", barcode: "LEO-RED-63-50" },
-      { size: "75x50 (80/pkt)", price: 37.60, mrp: 51.00, stock: 80, unit: "Pcs", barcode: "LEO-RED-75-50" },
-      { size: "75x63 (70/pkt)", price: 42.70, mrp: 58.00, stock: 70, unit: "Pcs", barcode: "LEO-RED-75-63" },
-      { size: "90x50 (50/pkt)", price: 52.20, mrp: 70.00, stock: 50, unit: "Pcs", barcode: "LEO-RED-90-50" },
-      { size: "90x63 (50/pkt)", price: 54.70, mrp: 74.00, stock: 50, unit: "Pcs", barcode: "LEO-RED-90-63" },
-      { size: "90x75 (40/pkt)", price: 56.40, mrp: 76.00, stock: 40, unit: "Pcs", barcode: "LEO-RED-90-75" },
-      { size: "110x63 (30/pkt)", price: 82.00, mrp: 110.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-110-63" },
-      { size: "110x75 (30/pkt)", price: 82.00, mrp: 110.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-110-75" },
-      { size: "110x90 (30/pkt)", price: 92.00, mrp: 125.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-110-90" }
+      { size: "32x25", price: 8.50, mrp: 12.00, stock: 50, unit: "Pcs", barcode: "LEO-RED-32-25" },
+      { size: "40x32", price: 13.70, mrp: 18.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-40-32" },
+      { size: "50x40", price: 19.70, mrp: 27.00, stock: 20, unit: "Pcs", barcode: "LEO-RED-50-40" },
+      { size: "63x32", price: 29.00, mrp: 40.00, stock: 140, unit: "Pcs", barcode: "LEO-RED-63-32" },
+      { size: "63x40", price: 29.00, mrp: 40.00, stock: 120, unit: "Pcs", barcode: "LEO-RED-63-40" },
+      { size: "63x50", price: 31.70, mrp: 43.00, stock: 120, unit: "Pcs", barcode: "LEO-RED-63-50" },
+      { size: "75x50", price: 37.60, mrp: 51.00, stock: 80, unit: "Pcs", barcode: "LEO-RED-75-50" },
+      { size: "75x63", price: 42.70, mrp: 58.00, stock: 70, unit: "Pcs", barcode: "LEO-RED-75-63" },
+      { size: "90x50", price: 52.20, mrp: 70.00, stock: 50, unit: "Pcs", barcode: "LEO-RED-90-50" },
+      { size: "90x63", price: 54.70, mrp: 74.00, stock: 50, unit: "Pcs", barcode: "LEO-RED-90-63" },
+      { size: "90x75", price: 56.40, mrp: 76.00, stock: 40, unit: "Pcs", barcode: "LEO-RED-90-75" },
+      { size: "110x63", price: 82.00, mrp: 110.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-110-63" },
+      { size: "110x75", price: 82.00, mrp: 110.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-110-75" },
+      { size: "110x90", price: 92.00, mrp: 125.00, stock: 30, unit: "Pcs", barcode: "LEO-RED-110-90" }
     ]
   },
   {
@@ -335,20 +335,20 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC pipe reducing bush fitting (All 14 sizes)",
     variants: [
-      { size: "32x25 (50/pkt)", price: 5.20, mrp: 7.50, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-32-25" },
-      { size: "40x32 (30/pkt)", price: 7.70, mrp: 11.00, stock: 30, unit: "Pcs", barcode: "LEO-BUSH-40-32" },
-      { size: "50x40 (25/pkt)", price: 14.60, mrp: 20.00, stock: 25, unit: "Pcs", barcode: "LEO-BUSH-50-40" },
-      { size: "50x32 (20/pkt)", price: 17.00, mrp: 23.00, stock: 20, unit: "Pcs", barcode: "LEO-BUSH-50-32" },
-      { size: "63x50 (200/pkt)", price: 25.00, mrp: 34.00, stock: 200, unit: "Pcs", barcode: "LEO-BUSH-63-50" },
-      { size: "63x40 (200/pkt)", price: 25.00, mrp: 34.00, stock: 200, unit: "Pcs", barcode: "LEO-BUSH-63-40" },
-      { size: "63x32 (175/pkt)", price: 27.40, mrp: 37.00, stock: 175, unit: "Pcs", barcode: "LEO-BUSH-63-32" },
-      { size: "75x63 (150/pkt)", price: 33.40, mrp: 45.00, stock: 150, unit: "Pcs", barcode: "LEO-BUSH-75-63" },
-      { size: "75x50 (150/pkt)", price: 36.80, mrp: 50.00, stock: 150, unit: "Pcs", barcode: "LEO-BUSH-75-50" },
-      { size: "90x75 (80/pkt)", price: 51.30, mrp: 70.00, stock: 80, unit: "Pcs", barcode: "LEO-BUSH-90-75" },
-      { size: "90x63 (80/pkt)", price: 55.60, mrp: 75.00, stock: 80, unit: "Pcs", barcode: "LEO-BUSH-90-63" },
-      { size: "110x90 (50/pkt)", price: 85.50, mrp: 115.00, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-110-90" },
-      { size: "110x75 (50/pkt)", price: 85.50, mrp: 115.00, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-110-75" },
-      { size: "110x63 (50/pkt)", price: 85.50, mrp: 115.00, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-110-63" }
+      { size: "32x25", price: 5.20, mrp: 7.50, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-32-25" },
+      { size: "40x32", price: 7.70, mrp: 11.00, stock: 30, unit: "Pcs", barcode: "LEO-BUSH-40-32" },
+      { size: "50x40", price: 14.60, mrp: 20.00, stock: 25, unit: "Pcs", barcode: "LEO-BUSH-50-40" },
+      { size: "50x32", price: 17.00, mrp: 23.00, stock: 20, unit: "Pcs", barcode: "LEO-BUSH-50-32" },
+      { size: "63x50", price: 25.00, mrp: 34.00, stock: 200, unit: "Pcs", barcode: "LEO-BUSH-63-50" },
+      { size: "63x40", price: 25.00, mrp: 34.00, stock: 200, unit: "Pcs", barcode: "LEO-BUSH-63-40" },
+      { size: "63x32", price: 27.40, mrp: 37.00, stock: 175, unit: "Pcs", barcode: "LEO-BUSH-63-32" },
+      { size: "75x63", price: 33.40, mrp: 45.00, stock: 150, unit: "Pcs", barcode: "LEO-BUSH-75-63" },
+      { size: "75x50", price: 36.80, mrp: 50.00, stock: 150, unit: "Pcs", barcode: "LEO-BUSH-75-50" },
+      { size: "90x75", price: 51.30, mrp: 70.00, stock: 80, unit: "Pcs", barcode: "LEO-BUSH-90-75" },
+      { size: "90x63", price: 55.60, mrp: 75.00, stock: 80, unit: "Pcs", barcode: "LEO-BUSH-90-63" },
+      { size: "110x90", price: 85.50, mrp: 115.00, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-110-90" },
+      { size: "110x75", price: 85.50, mrp: 115.00, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-110-75" },
+      { size: "110x63", price: 85.50, mrp: 115.00, stock: 50, unit: "Pcs", barcode: "LEO-BUSH-110-63" }
     ]
   },
   {
@@ -360,13 +360,13 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Threaded PVC pipe end cap (25mm to 90mm)",
     variants: [
-      { size: "25 mm (50/pkt)", price: 6.50, mrp: 9.00, stock: 50, unit: "Pcs", barcode: "LEO-THRCAP-25" },
-      { size: "32 mm (50/pkt)", price: 9.40, mrp: 13.00, stock: 50, unit: "Pcs", barcode: "LEO-THRCAP-32" },
-      { size: "40 mm (40/pkt)", price: 13.70, mrp: 19.00, stock: 40, unit: "Pcs", barcode: "LEO-THRCAP-40" },
-      { size: "50 mm (15/pkt)", price: 20.00, mrp: 28.00, stock: 15, unit: "Pcs", barcode: "LEO-THRCAP-50" },
-      { size: "63 mm (180/pkt)", price: 31.00, mrp: 42.00, stock: 180, unit: "Pcs", barcode: "LEO-THRCAP-63" },
-      { size: "75 mm (120/pkt)", price: 38.00, mrp: 52.00, stock: 120, unit: "Pcs", barcode: "LEO-THRCAP-75" },
-      { size: "90 mm (75/pkt)", price: 55.00, mrp: 75.00, stock: 75, unit: "Pcs", barcode: "LEO-THRCAP-90" }
+      { size: "25 mm", price: 6.50, mrp: 9.00, stock: 50, unit: "Pcs", barcode: "LEO-THRCAP-25" },
+      { size: "32 mm", price: 9.40, mrp: 13.00, stock: 50, unit: "Pcs", barcode: "LEO-THRCAP-32" },
+      { size: "40 mm", price: 13.70, mrp: 19.00, stock: 40, unit: "Pcs", barcode: "LEO-THRCAP-40" },
+      { size: "50 mm", price: 20.00, mrp: 28.00, stock: 15, unit: "Pcs", barcode: "LEO-THRCAP-50" },
+      { size: "63 mm", price: 31.00, mrp: 42.00, stock: 180, unit: "Pcs", barcode: "LEO-THRCAP-63" },
+      { size: "75 mm", price: 38.00, mrp: 52.00, stock: 120, unit: "Pcs", barcode: "LEO-THRCAP-75" },
+      { size: "90 mm", price: 55.00, mrp: 75.00, stock: 75, unit: "Pcs", barcode: "LEO-THRCAP-90" }
     ]
   },
   {
@@ -378,14 +378,14 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Straight PVC socket pipe coupler (25mm to 110mm)",
     variants: [
-      { size: "25 mm (50/pkt)", price: 6.00, mrp: 8.50, stock: 50, unit: "Pcs", barcode: "LEO-COUP-25" },
-      { size: "32 mm (50/pkt)", price: 8.60, mrp: 12.00, stock: 50, unit: "Pcs", barcode: "LEO-COUP-32" },
-      { size: "40 mm (30/pkt)", price: 12.00, mrp: 16.50, stock: 30, unit: "Pcs", barcode: "LEO-COUP-40" },
-      { size: "50 mm (20/pkt)", price: 18.80, mrp: 26.00, stock: 20, unit: "Pcs", barcode: "LEO-COUP-50" },
-      { size: "63 mm (100/pkt)", price: 29.00, mrp: 40.00, stock: 100, unit: "Pcs", barcode: "LEO-COUP-63" },
-      { size: "75 mm (60/pkt)", price: 39.80, mrp: 54.00, stock: 60, unit: "Pcs", barcode: "LEO-COUP-75" },
-      { size: "90 mm (40/pkt)", price: 62.00, mrp: 84.00, stock: 40, unit: "Pcs", barcode: "LEO-COUP-90" },
-      { size: "110 mm (22/pkt)", price: 100.00, mrp: 135.00, stock: 22, unit: "Pcs", barcode: "LEO-COUP-110" }
+      { size: "25 mm", price: 6.00, mrp: 8.50, stock: 50, unit: "Pcs", barcode: "LEO-COUP-25" },
+      { size: "32 mm", price: 8.60, mrp: 12.00, stock: 50, unit: "Pcs", barcode: "LEO-COUP-32" },
+      { size: "40 mm", price: 12.00, mrp: 16.50, stock: 30, unit: "Pcs", barcode: "LEO-COUP-40" },
+      { size: "50 mm", price: 18.80, mrp: 26.00, stock: 20, unit: "Pcs", barcode: "LEO-COUP-50" },
+      { size: "63 mm", price: 29.00, mrp: 40.00, stock: 100, unit: "Pcs", barcode: "LEO-COUP-63" },
+      { size: "75 mm", price: 39.80, mrp: 54.00, stock: 60, unit: "Pcs", barcode: "LEO-COUP-75" },
+      { size: "90 mm", price: 62.00, mrp: 84.00, stock: 40, unit: "Pcs", barcode: "LEO-COUP-90" },
+      { size: "110 mm", price: 100.00, mrp: 135.00, stock: 22, unit: "Pcs", barcode: "LEO-COUP-110" }
     ]
   },
 
@@ -399,9 +399,9 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC Brass Insert 90° Elbow",
     variants: [
-      { size: "3/4\" x 1/2\" (30/pkt)", price: 62.40, mrp: 85.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-ELB-3412" },
-      { size: "1\" x 1/2\" (30/pkt)", price: 64.10, mrp: 88.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-ELB-112" },
-      { size: "1\" x 3/4\" (25/pkt)", price: 94.00, mrp: 128.00, stock: 25, unit: "Pcs", barcode: "LEO-BR-ELB-134" }
+      { size: "3/4\" x 1/2\"", price: 62.40, mrp: 85.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-ELB-3412" },
+      { size: "1\" x 1/2\"", price: 64.10, mrp: 88.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-ELB-112" },
+      { size: "1\" x 3/4\"", price: 94.00, mrp: 128.00, stock: 25, unit: "Pcs", barcode: "LEO-BR-ELB-134" }
     ]
   },
   {
@@ -413,9 +413,9 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC Female Threaded Adaptor with Brass Insert",
     variants: [
-      { size: "3/4\" x 1/2\" (30/pkt)", price: 59.90, mrp: 82.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-FTA-3412" },
-      { size: "1\" x 1/2\" (30/pkt)", price: 64.10, mrp: 88.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-FTA-112" },
-      { size: "1\" x 3/4\" (25/pkt)", price: 74.40, mrp: 102.00, stock: 25, unit: "Pcs", barcode: "LEO-BR-FTA-134" }
+      { size: "3/4\" x 1/2\"", price: 59.90, mrp: 82.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-FTA-3412" },
+      { size: "1\" x 1/2\"", price: 64.10, mrp: 88.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-FTA-112" },
+      { size: "1\" x 3/4\"", price: 74.40, mrp: 102.00, stock: 25, unit: "Pcs", barcode: "LEO-BR-FTA-134" }
     ]
   },
   {
@@ -427,9 +427,9 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC 3-Way Tee with Brass Insert",
     variants: [
-      { size: "3/4\" x 1/2\" (30/pkt)", price: 64.00, mrp: 88.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-TEE-3412" },
-      { size: "1\" x 1/2\" (25/pkt)", price: 71.80, mrp: 98.00, stock: 25, unit: "Pcs", barcode: "LEO-BR-TEE-112" },
-      { size: "1\" x 3/4\" (20/pkt)", price: 102.60, mrp: 140.00, stock: 20, unit: "Pcs", barcode: "LEO-BR-TEE-134" }
+      { size: "3/4\" x 1/2\"", price: 64.00, mrp: 88.00, stock: 30, unit: "Pcs", barcode: "LEO-BR-TEE-3412" },
+      { size: "1\" x 1/2\"", price: 71.80, mrp: 98.00, stock: 25, unit: "Pcs", barcode: "LEO-BR-TEE-112" },
+      { size: "1\" x 3/4\"", price: 102.60, mrp: 140.00, stock: 20, unit: "Pcs", barcode: "LEO-BR-TEE-134" }
     ]
   },
   {
@@ -441,10 +441,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC 3-piece pipe union (25mm to 50mm)",
     variants: [
-      { size: "25 mm (25/pkt)", price: 34.50, mrp: 48.00, stock: 25, unit: "Pcs", barcode: "LEO-UNION-25" },
-      { size: "32 mm (20/pkt)", price: 39.80, mrp: 55.00, stock: 20, unit: "Pcs", barcode: "LEO-UNION-32" },
-      { size: "40 mm (15/pkt)", price: 56.20, mrp: 78.00, stock: 15, unit: "Pcs", barcode: "LEO-UNION-40" },
-      { size: "50 mm (10/pkt)", price: 87.50, mrp: 120.00, stock: 10, unit: "Pcs", barcode: "LEO-UNION-50" }
+      { size: "25 mm", price: 34.50, mrp: 48.00, stock: 25, unit: "Pcs", barcode: "LEO-UNION-25" },
+      { size: "32 mm", price: 39.80, mrp: 55.00, stock: 20, unit: "Pcs", barcode: "LEO-UNION-32" },
+      { size: "40 mm", price: 56.20, mrp: 78.00, stock: 15, unit: "Pcs", barcode: "LEO-UNION-40" },
+      { size: "50 mm", price: 87.50, mrp: 120.00, stock: 10, unit: "Pcs", barcode: "LEO-UNION-50" }
     ]
   },
   {
@@ -456,10 +456,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC 45 degree directional elbow (25mm to 50mm)",
     variants: [
-      { size: "25 mm (50/pkt)", price: 10.50, mrp: 15.00, stock: 50, unit: "Pcs", barcode: "LEO-ELB45-25" },
-      { size: "32 mm (30/pkt)", price: 15.50, mrp: 22.00, stock: 30, unit: "Pcs", barcode: "LEO-ELB45-32" },
-      { size: "40 mm (30/pkt)", price: 18.80, mrp: 26.00, stock: 30, unit: "Pcs", barcode: "LEO-ELB45-40" },
-      { size: "50 mm (15/pkt)", price: 29.00, mrp: 40.00, stock: 15, unit: "Pcs", barcode: "LEO-ELB45-50" }
+      { size: "25 mm", price: 10.50, mrp: 15.00, stock: 50, unit: "Pcs", barcode: "LEO-ELB45-25" },
+      { size: "32 mm", price: 15.50, mrp: 22.00, stock: 30, unit: "Pcs", barcode: "LEO-ELB45-32" },
+      { size: "40 mm", price: 18.80, mrp: 26.00, stock: 30, unit: "Pcs", barcode: "LEO-ELB45-40" },
+      { size: "50 mm", price: 29.00, mrp: 40.00, stock: 15, unit: "Pcs", barcode: "LEO-ELB45-50" }
     ]
   },
   {
@@ -471,8 +471,8 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "SWR Drainage PVC Single 87.5° bend",
     variants: [
-      { size: "75 mm (84/pkt)", price: 73.00, mrp: 98.00, stock: 84, unit: "Pcs", barcode: "LEO-SWR-ELB-75" },
-      { size: "110 mm (42/pkt)", price: 137.00, mrp: 185.00, stock: 42, unit: "Pcs", barcode: "LEO-SWR-ELB-110" }
+      { size: "75 mm", price: 73.00, mrp: 98.00, stock: 84, unit: "Pcs", barcode: "LEO-SWR-ELB-75" },
+      { size: "110 mm", price: 137.00, mrp: 185.00, stock: 42, unit: "Pcs", barcode: "LEO-SWR-ELB-110" }
     ]
   },
   {
@@ -484,8 +484,8 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "SWR Drainage PVC Single branch tee",
     variants: [
-      { size: "75 mm (72/pkt)", price: 94.00, mrp: 128.00, stock: 72, unit: "Pcs", barcode: "LEO-SWR-TEE-75" },
-      { size: "110 mm (26/pkt)", price: 184.00, mrp: 248.00, stock: 26, unit: "Pcs", barcode: "LEO-SWR-TEE-110" }
+      { size: "75 mm", price: 94.00, mrp: 128.00, stock: 72, unit: "Pcs", barcode: "LEO-SWR-TEE-75" },
+      { size: "110 mm", price: 184.00, mrp: 248.00, stock: 26, unit: "Pcs", barcode: "LEO-SWR-TEE-110" }
     ]
   },
   {
@@ -497,8 +497,8 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "SWR Drainage PVC Elbow with inspection door",
     variants: [
-      { size: "75 mm (72/pkt)", price: 90.00, mrp: 122.00, stock: 72, unit: "Pcs", barcode: "LEO-SWR-DELB-75" },
-      { size: "110 mm (35/pkt)", price: 163.00, mrp: 220.00, stock: 35, unit: "Pcs", barcode: "LEO-SWR-DELB-110" }
+      { size: "75 mm", price: 90.00, mrp: 122.00, stock: 72, unit: "Pcs", barcode: "LEO-SWR-DELB-75" },
+      { size: "110 mm", price: 163.00, mrp: 220.00, stock: 35, unit: "Pcs", barcode: "LEO-SWR-DELB-110" }
     ]
   },
   {
@@ -510,8 +510,8 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "SWR Drainage PVC Tee with inspection door",
     variants: [
-      { size: "75 mm (45/pkt)", price: 120.00, mrp: 165.00, stock: 45, unit: "Pcs", barcode: "LEO-SWR-DTEE-75" },
-      { size: "110 mm (24/pkt)", price: 223.00, mrp: 300.00, stock: 24, unit: "Pcs", barcode: "LEO-SWR-DTEE-110" }
+      { size: "75 mm", price: 120.00, mrp: 165.00, stock: 45, unit: "Pcs", barcode: "LEO-SWR-DTEE-75" },
+      { size: "110 mm", price: 223.00, mrp: 300.00, stock: 24, unit: "Pcs", barcode: "LEO-SWR-DTEE-110" }
     ]
   },
 
@@ -525,10 +525,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "SWR Door Elbow (63mm to 110mm)",
     variants: [
-      { size: "63 mm (60/pkt)", price: 54.70, mrp: 75.00, stock: 60, unit: "Pcs", barcode: "LEO-SWR-DE-63" },
-      { size: "75 mm (30/pkt)", price: 76.90, mrp: 105.00, stock: 30, unit: "Pcs", barcode: "LEO-SWR-DE-75" },
-      { size: "90 mm (20/pkt)", price: 106.90, mrp: 145.00, stock: 20, unit: "Pcs", barcode: "LEO-SWR-DE-90" },
-      { size: "110 mm (11/pkt)", price: 156.95, mrp: 210.00, stock: 11, unit: "Pcs", barcode: "LEO-SWR-DE-110" }
+      { size: "63 mm", price: 54.70, mrp: 75.00, stock: 60, unit: "Pcs", barcode: "LEO-SWR-DE-63" },
+      { size: "75 mm", price: 76.90, mrp: 105.00, stock: 30, unit: "Pcs", barcode: "LEO-SWR-DE-75" },
+      { size: "90 mm", price: 106.90, mrp: 145.00, stock: 20, unit: "Pcs", barcode: "LEO-SWR-DE-90" },
+      { size: "110 mm", price: 156.95, mrp: 210.00, stock: 11, unit: "Pcs", barcode: "LEO-SWR-DE-110" }
     ]
   },
   {
@@ -540,10 +540,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "SWR Door Tee (63mm to 110mm)",
     variants: [
-      { size: "63 mm (40/pkt)", price: 70.20, mrp: 95.00, stock: 40, unit: "Pcs", barcode: "LEO-SWR-DT-63" },
-      { size: "75 mm (20/pkt)", price: 97.50, mrp: 132.00, stock: 20, unit: "Pcs", barcode: "LEO-SWR-DT-75" },
-      { size: "90 mm (15/pkt)", price: 145.30, mrp: 198.00, stock: 15, unit: "Pcs", barcode: "LEO-SWR-DT-90" },
-      { size: "110 mm (8/pkt)", price: 196.60, mrp: 265.00, stock: 8, unit: "Pcs", barcode: "LEO-SWR-DT-110" }
+      { size: "63 mm", price: 70.20, mrp: 95.00, stock: 40, unit: "Pcs", barcode: "LEO-SWR-DT-63" },
+      { size: "75 mm", price: 97.50, mrp: 132.00, stock: 20, unit: "Pcs", barcode: "LEO-SWR-DT-75" },
+      { size: "90 mm", price: 145.30, mrp: 198.00, stock: 15, unit: "Pcs", barcode: "LEO-SWR-DT-90" },
+      { size: "110 mm", price: 196.60, mrp: 265.00, stock: 8, unit: "Pcs", barcode: "LEO-SWR-DT-110" }
     ]
   },
   {
@@ -555,8 +555,8 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "PVC Nahani floor trap with jali",
     variants: [
-      { size: "110x63 (16/pkt)", price: 130.00, mrp: 175.00, stock: 16, unit: "Pcs", barcode: "LEO-NAHANI-110-63" },
-      { size: "110x75 (16/pkt)", price: 130.00, mrp: 175.00, stock: 16, unit: "Pcs", barcode: "LEO-NAHANI-110-75" }
+      { size: "110x63", price: 130.00, mrp: 175.00, stock: 16, unit: "Pcs", barcode: "LEO-NAHANI-110-63" },
+      { size: "110x75", price: 130.00, mrp: 175.00, stock: 16, unit: "Pcs", barcode: "LEO-NAHANI-110-75" }
     ]
   },
   {
@@ -568,7 +568,7 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Multi inlet floor trap with jali",
     variants: [
-      { size: "110x75 (15/pkt)", price: 177.50, mrp: 240.00, stock: 15, unit: "Pcs", barcode: "LEO-MULTITRAP-110" }
+      { size: "110x75", price: 177.50, mrp: 240.00, stock: 15, unit: "Pcs", barcode: "LEO-MULTITRAP-110" }
     ]
   },
   {
@@ -580,10 +580,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Ventilation top cowl mushroom cap",
     variants: [
-      { size: "63 mm (150/pkt)", price: 12.90, mrp: 18.00, stock: 150, unit: "Pcs", barcode: "LEO-COWL-63" },
-      { size: "75 mm (120/pkt)", price: 17.00, mrp: 24.00, stock: 120, unit: "Pcs", barcode: "LEO-COWL-75" },
-      { size: "90 mm (90/pkt)", price: 25.70, mrp: 35.00, stock: 90, unit: "Pcs", barcode: "LEO-COWL-90" },
-      { size: "110 mm (40/pkt)", price: 34.20, mrp: 48.00, stock: 40, unit: "Pcs", barcode: "LEO-COWL-110" }
+      { size: "63 mm", price: 12.90, mrp: 18.00, stock: 150, unit: "Pcs", barcode: "LEO-COWL-63" },
+      { size: "75 mm", price: 17.00, mrp: 24.00, stock: 120, unit: "Pcs", barcode: "LEO-COWL-75" },
+      { size: "90 mm", price: 25.70, mrp: 35.00, stock: 90, unit: "Pcs", barcode: "LEO-COWL-90" },
+      { size: "110 mm", price: 34.20, mrp: 48.00, stock: 40, unit: "Pcs", barcode: "LEO-COWL-110" }
     ]
   },
   {
@@ -595,10 +595,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "45 degree Y branch junction",
     variants: [
-      { size: "63 mm (25/pkt)", price: 93.20, mrp: 128.00, stock: 25, unit: "Pcs", barcode: "LEO-Y-63" },
-      { size: "75 mm (20/pkt)", price: 112.00, mrp: 155.00, stock: 20, unit: "Pcs", barcode: "LEO-Y-75" },
-      { size: "90 mm (11/pkt)", price: 180.00, mrp: 245.00, stock: 11, unit: "Pcs", barcode: "LEO-Y-90" },
-      { size: "110 mm (6/pkt)", price: 218.00, mrp: 295.00, stock: 6, unit: "Pcs", barcode: "LEO-Y-110" }
+      { size: "63 mm", price: 93.20, mrp: 128.00, stock: 25, unit: "Pcs", barcode: "LEO-Y-63" },
+      { size: "75 mm", price: 112.00, mrp: 155.00, stock: 20, unit: "Pcs", barcode: "LEO-Y-75" },
+      { size: "90 mm", price: 180.00, mrp: 245.00, stock: 11, unit: "Pcs", barcode: "LEO-Y-90" },
+      { size: "110 mm", price: 218.00, mrp: 295.00, stock: 6, unit: "Pcs", barcode: "LEO-Y-110" }
     ]
   },
   {
@@ -610,18 +610,18 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Branch tapping service saddle clamp",
     variants: [
-      { size: "63x20 (70/pkt)", price: 90.00, mrp: 125.00, stock: 70, unit: "Pcs", barcode: "LEO-SADDLE-63-20" },
-      { size: "63x25 (70/pkt)", price: 90.00, mrp: 125.00, stock: 70, unit: "Pcs", barcode: "LEO-SADDLE-63-25" },
-      { size: "63x32 (70/pkt)", price: 90.00, mrp: 125.00, stock: 70, unit: "Pcs", barcode: "LEO-SADDLE-63-32" },
-      { size: "75x20 (60/pkt)", price: 108.00, mrp: 148.00, stock: 60, unit: "Pcs", barcode: "LEO-SADDLE-75-20" },
-      { size: "75x25 (60/pkt)", price: 108.00, mrp: 148.00, stock: 60, unit: "Pcs", barcode: "LEO-SADDLE-75-25" },
-      { size: "75x32 (60/pkt)", price: 108.00, mrp: 148.00, stock: 60, unit: "Pcs", barcode: "LEO-SADDLE-75-32" },
-      { size: "90x20 (50/pkt)", price: 125.00, mrp: 170.00, stock: 50, unit: "Pcs", barcode: "LEO-SADDLE-90-20" },
-      { size: "90x25 (50/pkt)", price: 125.00, mrp: 170.00, stock: 50, unit: "Pcs", barcode: "LEO-SADDLE-90-25" },
-      { size: "90x32 (50/pkt)", price: 125.00, mrp: 170.00, stock: 50, unit: "Pcs", barcode: "LEO-SADDLE-90-32" },
-      { size: "110x20 (40/pkt)", price: 157.00, mrp: 215.00, stock: 40, unit: "Pcs", barcode: "LEO-SADDLE-110-20" },
-      { size: "110x25 (40/pkt)", price: 157.00, mrp: 215.00, stock: 40, unit: "Pcs", barcode: "LEO-SADDLE-110-25" },
-      { size: "110x32 (40/pkt)", price: 157.00, mrp: 215.00, stock: 40, unit: "Pcs", barcode: "LEO-SADDLE-110-32" }
+      { size: "63x20", price: 90.00, mrp: 125.00, stock: 70, unit: "Pcs", barcode: "LEO-SADDLE-63-20" },
+      { size: "63x25", price: 90.00, mrp: 125.00, stock: 70, unit: "Pcs", barcode: "LEO-SADDLE-63-25" },
+      { size: "63x32", price: 90.00, mrp: 125.00, stock: 70, unit: "Pcs", barcode: "LEO-SADDLE-63-32" },
+      { size: "75x20", price: 108.00, mrp: 148.00, stock: 60, unit: "Pcs", barcode: "LEO-SADDLE-75-20" },
+      { size: "75x25", price: 108.00, mrp: 148.00, stock: 60, unit: "Pcs", barcode: "LEO-SADDLE-75-25" },
+      { size: "75x32", price: 108.00, mrp: 148.00, stock: 60, unit: "Pcs", barcode: "LEO-SADDLE-75-32" },
+      { size: "90x20", price: 125.00, mrp: 170.00, stock: 50, unit: "Pcs", barcode: "LEO-SADDLE-90-20" },
+      { size: "90x25", price: 125.00, mrp: 170.00, stock: 50, unit: "Pcs", barcode: "LEO-SADDLE-90-25" },
+      { size: "90x32", price: 125.00, mrp: 170.00, stock: 50, unit: "Pcs", barcode: "LEO-SADDLE-90-32" },
+      { size: "110x20", price: 157.00, mrp: 215.00, stock: 40, unit: "Pcs", barcode: "LEO-SADDLE-110-20" },
+      { size: "110x25", price: 157.00, mrp: 215.00, stock: 40, unit: "Pcs", barcode: "LEO-SADDLE-110-25" },
+      { size: "110x32", price: 157.00, mrp: 215.00, stock: 40, unit: "Pcs", barcode: "LEO-SADDLE-110-32" }
     ]
   },
   {
@@ -633,10 +633,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "SWR Drainage 45 degree elbow",
     variants: [
-      { size: "63 mm (90/pkt)", price: 38.00, mrp: 52.00, stock: 90, unit: "Pcs", barcode: "LEO-SWR-45-63" },
-      { size: "75 mm (50/pkt)", price: 56.40, mrp: 78.00, stock: 50, unit: "Pcs", barcode: "LEO-SWR-45-75" },
-      { size: "90 mm (25/pkt)", price: 94.00, mrp: 128.00, stock: 25, unit: "Pcs", barcode: "LEO-SWR-45-90" },
-      { size: "110 mm (16/pkt)", price: 110.00, mrp: 150.00, stock: 16, unit: "Pcs", barcode: "LEO-SWR-45-110" }
+      { size: "63 mm", price: 38.00, mrp: 52.00, stock: 90, unit: "Pcs", barcode: "LEO-SWR-45-63" },
+      { size: "75 mm", price: 56.40, mrp: 78.00, stock: 50, unit: "Pcs", barcode: "LEO-SWR-45-75" },
+      { size: "90 mm", price: 94.00, mrp: 128.00, stock: 25, unit: "Pcs", barcode: "LEO-SWR-45-90" },
+      { size: "110 mm", price: 110.00, mrp: 150.00, stock: 16, unit: "Pcs", barcode: "LEO-SWR-45-110" }
     ]
   },
 
@@ -688,10 +688,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "cPVC 90° solvent weld elbow",
     variants: [
-      { size: "3/4\" (50/pkt)", price: 18.00, mrp: 25.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-ELB-34" },
-      { size: "1\" (30/pkt)", price: 35.00, mrp: 48.00, stock: 30, unit: "Pcs", barcode: "LEO-CPVC-ELB-1" },
-      { size: "1 1/4\" (15/pkt)", price: 75.00, mrp: 102.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-ELB-1.25" },
-      { size: "1 1/2\" (10/pkt)", price: 140.00, mrp: 190.00, stock: 10, unit: "Pcs", barcode: "LEO-CPVC-ELB-1.5" }
+      { size: "3/4\"", price: 18.00, mrp: 25.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-ELB-34" },
+      { size: "1\"", price: 35.00, mrp: 48.00, stock: 30, unit: "Pcs", barcode: "LEO-CPVC-ELB-1" },
+      { size: "1 1/4\"", price: 75.00, mrp: 102.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-ELB-1.25" },
+      { size: "1 1/2\"", price: 140.00, mrp: 190.00, stock: 10, unit: "Pcs", barcode: "LEO-CPVC-ELB-1.5" }
     ]
   },
   {
@@ -703,10 +703,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "cPVC equal 3-way branch tee",
     variants: [
-      { size: "3/4\" (50/pkt)", price: 30.00, mrp: 42.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-TEE-34" },
-      { size: "1\" (20/pkt)", price: 50.00, mrp: 68.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-TEE-1" },
-      { size: "1 1/4\" (10/pkt)", price: 90.00, mrp: 122.00, stock: 10, unit: "Pcs", barcode: "LEO-CPVC-TEE-1.25" },
-      { size: "1 1/2\" (5/pkt)", price: 180.00, mrp: 245.00, stock: 5, unit: "Pcs", barcode: "LEO-CPVC-TEE-1.5" }
+      { size: "3/4\"", price: 30.00, mrp: 42.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-TEE-34" },
+      { size: "1\"", price: 50.00, mrp: 68.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-TEE-1" },
+      { size: "1 1/4\"", price: 90.00, mrp: 122.00, stock: 10, unit: "Pcs", barcode: "LEO-CPVC-TEE-1.25" },
+      { size: "1 1/2\"", price: 180.00, mrp: 245.00, stock: 5, unit: "Pcs", barcode: "LEO-CPVC-TEE-1.5" }
     ]
   },
   {
@@ -718,10 +718,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "cPVC straight socket coupler",
     variants: [
-      { size: "3/4\" (100/pkt)", price: 14.00, mrp: 20.00, stock: 100, unit: "Pcs", barcode: "LEO-CPVC-COUP-34" },
-      { size: "1\" (50/pkt)", price: 25.00, mrp: 35.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-COUP-1" },
-      { size: "1 1/4\" (20/pkt)", price: 42.00, mrp: 58.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-COUP-1.25" },
-      { size: "1 1/2\" (15/pkt)", price: 75.00, mrp: 102.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-COUP-1.5" }
+      { size: "3/4\"", price: 14.00, mrp: 20.00, stock: 100, unit: "Pcs", barcode: "LEO-CPVC-COUP-34" },
+      { size: "1\"", price: 25.00, mrp: 35.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-COUP-1" },
+      { size: "1 1/4\"", price: 42.00, mrp: 58.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-COUP-1.25" },
+      { size: "1 1/2\"", price: 75.00, mrp: 102.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-COUP-1.5" }
     ]
   },
   {
@@ -733,10 +733,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "cPVC pipe end cap",
     variants: [
-      { size: "3/4\" (100/pkt)", price: 11.00, mrp: 15.00, stock: 100, unit: "Pcs", barcode: "LEO-CPVC-CAP-34" },
-      { size: "1\" (50/pkt)", price: 18.00, mrp: 25.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-CAP-1" },
-      { size: "1 1/4\" (30/pkt)", price: 31.80, mrp: 43.00, stock: 30, unit: "Pcs", barcode: "LEO-CPVC-CAP-1.25" },
-      { size: "1 1/2\" (20/pkt)", price: 47.30, mrp: 64.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-CAP-1.5" }
+      { size: "3/4\"", price: 11.00, mrp: 15.00, stock: 100, unit: "Pcs", barcode: "LEO-CPVC-CAP-34" },
+      { size: "1\"", price: 18.00, mrp: 25.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-CAP-1" },
+      { size: "1 1/4\"", price: 31.80, mrp: 43.00, stock: 30, unit: "Pcs", barcode: "LEO-CPVC-CAP-1.25" },
+      { size: "1 1/2\"", price: 47.30, mrp: 64.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-CAP-1.5" }
     ]
   },
   {
@@ -748,10 +748,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "cPVC female threaded adaptor",
     variants: [
-      { size: "3/4\" (50/pkt)", price: 25.00, mrp: 35.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-FTA-34" },
-      { size: "1\" (30/pkt)", price: 40.00, mrp: 55.00, stock: 30, unit: "Pcs", barcode: "LEO-CPVC-FTA-1" },
-      { size: "1 1/4\" (15/pkt)", price: 70.00, mrp: 95.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-FTA-1.25" },
-      { size: "1 1/2\" (10/pkt)", price: 120.00, mrp: 165.00, stock: 10, unit: "Pcs", barcode: "LEO-CPVC-FTA-1.5" }
+      { size: "3/4\"", price: 25.00, mrp: 35.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-FTA-34" },
+      { size: "1\"", price: 40.00, mrp: 55.00, stock: 30, unit: "Pcs", barcode: "LEO-CPVC-FTA-1" },
+      { size: "1 1/4\"", price: 70.00, mrp: 95.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-FTA-1.25" },
+      { size: "1 1/2\"", price: 120.00, mrp: 165.00, stock: 10, unit: "Pcs", barcode: "LEO-CPVC-FTA-1.5" }
     ]
   },
   {
@@ -763,10 +763,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "cPVC male threaded adaptor",
     variants: [
-      { size: "3/4\" (50/pkt)", price: 16.40, mrp: 23.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-MTA-34" },
-      { size: "1\" (50/pkt)", price: 32.00, mrp: 44.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-MTA-1" },
-      { size: "1 1/4\" (20/pkt)", price: 50.00, mrp: 68.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-MTA-1.25" },
-      { size: "1 1/2\" (15/pkt)", price: 72.00, mrp: 98.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-MTA-1.5" }
+      { size: "3/4\"", price: 16.40, mrp: 23.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-MTA-34" },
+      { size: "1\"", price: 32.00, mrp: 44.00, stock: 50, unit: "Pcs", barcode: "LEO-CPVC-MTA-1" },
+      { size: "1 1/4\"", price: 50.00, mrp: 68.00, stock: 20, unit: "Pcs", barcode: "LEO-CPVC-MTA-1.25" },
+      { size: "1 1/2\"", price: 72.00, mrp: 98.00, stock: 15, unit: "Pcs", barcode: "LEO-CPVC-MTA-1.5" }
     ]
   },
 
@@ -810,10 +810,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC Schedule 40 90° elbow",
     variants: [
-      { size: "3/4\" (40/pkt)", price: 16.50, mrp: 23.00, stock: 40, unit: "Pcs", barcode: "LEO-UPVC-ELB-34" },
-      { size: "1\" (30/pkt)", price: 26.60, mrp: 36.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-ELB-1" },
-      { size: "1 1/4\" (15/pkt)", price: 40.50, mrp: 55.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-ELB-1.25" },
-      { size: "1 1/2\" (10/pkt)", price: 56.00, mrp: 76.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-ELB-1.5" }
+      { size: "3/4\"", price: 16.50, mrp: 23.00, stock: 40, unit: "Pcs", barcode: "LEO-UPVC-ELB-34" },
+      { size: "1\"", price: 26.60, mrp: 36.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-ELB-1" },
+      { size: "1 1/4\"", price: 40.50, mrp: 55.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-ELB-1.25" },
+      { size: "1 1/2\"", price: 56.00, mrp: 76.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-ELB-1.5" }
     ]
   },
   {
@@ -825,10 +825,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC Schedule 40 3-way equal tee",
     variants: [
-      { size: "3/4\" (30/pkt)", price: 21.60, mrp: 29.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-TEE-34" },
-      { size: "1\" (20/pkt)", price: 34.30, mrp: 46.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-TEE-1" },
-      { size: "1 1/4\" (12/pkt)", price: 54.00, mrp: 73.00, stock: 12, unit: "Pcs", barcode: "LEO-UPVC-TEE-1.25" },
-      { size: "1 1/2\" (6/pkt)", price: 76.90, mrp: 104.00, stock: 6, unit: "Pcs", barcode: "LEO-UPVC-TEE-1.5" }
+      { size: "3/4\"", price: 21.60, mrp: 29.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-TEE-34" },
+      { size: "1\"", price: 34.30, mrp: 46.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-TEE-1" },
+      { size: "1 1/4\"", price: 54.00, mrp: 73.00, stock: 12, unit: "Pcs", barcode: "LEO-UPVC-TEE-1.25" },
+      { size: "1 1/2\"", price: 76.90, mrp: 104.00, stock: 6, unit: "Pcs", barcode: "LEO-UPVC-TEE-1.5" }
     ]
   },
   {
@@ -840,10 +840,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC straight pipe socket coupler",
     variants: [
-      { size: "3/4\" (50/pkt)", price: 11.70, mrp: 16.00, stock: 50, unit: "Pcs", barcode: "LEO-UPVC-COUP-34" },
-      { size: "1\" (30/pkt)", price: 18.20, mrp: 25.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-COUP-1" },
-      { size: "1 1/4\" (15/pkt)", price: 25.70, mrp: 35.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-COUP-1.25" },
-      { size: "1 1/2\" (10/pkt)", price: 35.90, mrp: 48.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-COUP-1.5" }
+      { size: "3/4\"", price: 11.70, mrp: 16.00, stock: 50, unit: "Pcs", barcode: "LEO-UPVC-COUP-34" },
+      { size: "1\"", price: 18.20, mrp: 25.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-COUP-1" },
+      { size: "1 1/4\"", price: 25.70, mrp: 35.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-COUP-1.25" },
+      { size: "1 1/2\"", price: 35.90, mrp: 48.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-COUP-1.5" }
     ]
   },
   {
@@ -855,10 +855,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC pipe end cap",
     variants: [
-      { size: "3/4\" (50/pkt)", price: 7.60, mrp: 10.50, stock: 50, unit: "Pcs", barcode: "LEO-UPVC-CAP-34" },
-      { size: "1\" (50/pkt)", price: 12.80, mrp: 17.50, stock: 50, unit: "Pcs", barcode: "LEO-UPVC-CAP-1" },
-      { size: "1 1/4\" (20/pkt)", price: 19.70, mrp: 27.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-CAP-1.25" },
-      { size: "1 1/2\" (10/pkt)", price: 26.50, mrp: 36.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-CAP-1.5" }
+      { size: "3/4\"", price: 7.60, mrp: 10.50, stock: 50, unit: "Pcs", barcode: "LEO-UPVC-CAP-34" },
+      { size: "1\"", price: 12.80, mrp: 17.50, stock: 50, unit: "Pcs", barcode: "LEO-UPVC-CAP-1" },
+      { size: "1 1/4\"", price: 19.70, mrp: 27.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-CAP-1.25" },
+      { size: "1 1/2\"", price: 26.50, mrp: 36.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-CAP-1.5" }
     ]
   },
   {
@@ -870,10 +870,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC Male Threaded Adaptor",
     variants: [
-      { size: "3/4\" (60/pkt)", price: 8.90, mrp: 12.00, stock: 60, unit: "Pcs", barcode: "LEO-UPVC-MTA-34" },
-      { size: "1\" (30/pkt)", price: 15.00, mrp: 20.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-MTA-1" },
-      { size: "1 1/4\" (30/pkt)", price: 22.00, mrp: 30.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-MTA-1.25" },
-      { size: "1 1/2\" (15/pkt)", price: 30.00, mrp: 40.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-MTA-1.5" }
+      { size: "3/4\"", price: 8.90, mrp: 12.00, stock: 60, unit: "Pcs", barcode: "LEO-UPVC-MTA-34" },
+      { size: "1\"", price: 15.00, mrp: 20.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-MTA-1" },
+      { size: "1 1/4\"", price: 22.00, mrp: 30.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-MTA-1.25" },
+      { size: "1 1/2\"", price: 30.00, mrp: 40.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-MTA-1.5" }
     ]
   },
   {
@@ -885,10 +885,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC Female Threaded Adaptor",
     variants: [
-      { size: "3/4\" (60/pkt)", price: 11.20, mrp: 15.00, stock: 60, unit: "Pcs", barcode: "LEO-UPVC-FTA-34" },
-      { size: "1\" (30/pkt)", price: 18.00, mrp: 24.50, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-FTA-1" },
-      { size: "1 1/4\" (20/pkt)", price: 26.50, mrp: 36.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-FTA-1.25" },
-      { size: "1 1/2\" (15/pkt)", price: 34.20, mrp: 46.50, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-FTA-1.5" }
+      { size: "3/4\"", price: 11.20, mrp: 15.00, stock: 60, unit: "Pcs", barcode: "LEO-UPVC-FTA-34" },
+      { size: "1\"", price: 18.00, mrp: 24.50, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-FTA-1" },
+      { size: "1 1/4\"", price: 26.50, mrp: 36.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-FTA-1.25" },
+      { size: "1 1/2\"", price: 34.20, mrp: 46.50, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-FTA-1.5" }
     ]
   },
 
@@ -902,11 +902,11 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "Threaded uPVC water tank outlet nipple",
     variants: [
-      { size: "3/4\" (30/pkt)", price: 29.30, mrp: 40.00, stock: 30, unit: "Pcs", barcode: "LEO-TN-34" },
-      { size: "1\" (20/pkt)", price: 42.00, mrp: 58.00, stock: 20, unit: "Pcs", barcode: "LEO-TN-1" },
-      { size: "1 1/4\" (10/pkt)", price: 59.80, mrp: 82.00, stock: 10, unit: "Pcs", barcode: "LEO-TN-1.25" },
-      { size: "1 1/2\" (10/pkt)", price: 88.90, mrp: 120.00, stock: 10, unit: "Pcs", barcode: "LEO-TN-1.5" },
-      { size: "2\" (5/pkt)", price: 143.60, mrp: 195.00, stock: 5, unit: "Pcs", barcode: "LEO-TN-2" }
+      { size: "3/4\"", price: 29.30, mrp: 40.00, stock: 30, unit: "Pcs", barcode: "LEO-TN-34" },
+      { size: "1\"", price: 42.00, mrp: 58.00, stock: 20, unit: "Pcs", barcode: "LEO-TN-1" },
+      { size: "1 1/4\"", price: 59.80, mrp: 82.00, stock: 10, unit: "Pcs", barcode: "LEO-TN-1.25" },
+      { size: "1 1/2\"", price: 88.90, mrp: 120.00, stock: 10, unit: "Pcs", barcode: "LEO-TN-1.5" },
+      { size: "2\"", price: 143.60, mrp: 195.00, stock: 5, unit: "Pcs", barcode: "LEO-TN-2" }
     ]
   },
   {
@@ -918,10 +918,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC 45 degree elbow",
     variants: [
-      { size: "3/4\" (30/pkt)", price: 14.60, mrp: 20.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-45-34" },
-      { size: "1\" (30/pkt)", price: 23.10, mrp: 32.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-45-1" },
-      { size: "1 1/4\" (20/pkt)", price: 35.90, mrp: 48.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-45-1.25" },
-      { size: "1 1/2\" (10/pkt)", price: 51.30, mrp: 70.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-45-1.5" }
+      { size: "3/4\"", price: 14.60, mrp: 20.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-45-34" },
+      { size: "1\"", price: 23.10, mrp: 32.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-45-1" },
+      { size: "1 1/4\"", price: 35.90, mrp: 48.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-45-1.25" },
+      { size: "1 1/2\"", price: 51.30, mrp: 70.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-45-1.5" }
     ]
   },
   {
@@ -933,11 +933,11 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC pipe reducer",
     variants: [
-      { size: "1x3/4\" (30/pkt)", price: 16.00, mrp: 22.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-RED-1-34" },
-      { size: "1 1/4\"x3/4\" (30/pkt)", price: 25.70, mrp: 35.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-RED-1.25-34" },
-      { size: "1 1/4\"x1\" (20/pkt)", price: 26.50, mrp: 36.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-RED-1.25-1" },
-      { size: "1 1/2\"x1\" (20/pkt)", price: 34.20, mrp: 46.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-RED-1.5-1" },
-      { size: "1 1/2\"x1 1/4\" (10/pkt)", price: 35.90, mrp: 48.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-RED-1.5-1.25" }
+      { size: "1x3/4\"", price: 16.00, mrp: 22.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-RED-1-34" },
+      { size: "1 1/4\"x3/4\"", price: 25.70, mrp: 35.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-RED-1.25-34" },
+      { size: "1 1/4\"x1\"", price: 26.50, mrp: 36.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-RED-1.25-1" },
+      { size: "1 1/2\"x1\"", price: 34.20, mrp: 46.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-RED-1.5-1" },
+      { size: "1 1/2\"x1 1/4\"", price: 35.90, mrp: 48.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-RED-1.5-1.25" }
     ]
   },
   {
@@ -949,10 +949,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC socket union",
     variants: [
-      { size: "3/4\" (20/pkt)", price: 38.50, mrp: 52.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-UNION-34" },
-      { size: "1\" (15/pkt)", price: 59.90, mrp: 82.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-UNION-1" },
-      { size: "1 1/4\" (10/pkt)", price: 85.50, mrp: 115.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-UNION-1.25" },
-      { size: "1 1/2\" (5/pkt)", price: 120.00, mrp: 165.00, stock: 5, unit: "Pcs", barcode: "LEO-UPVC-UNION-1.5" }
+      { size: "3/4\"", price: 38.50, mrp: 52.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-UNION-34" },
+      { size: "1\"", price: 59.90, mrp: 82.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-UNION-1" },
+      { size: "1 1/4\"", price: 85.50, mrp: 115.00, stock: 10, unit: "Pcs", barcode: "LEO-UPVC-UNION-1.25" },
+      { size: "1 1/2\"", price: 120.00, mrp: 165.00, stock: 5, unit: "Pcs", barcode: "LEO-UPVC-UNION-1.5" }
     ]
   },
   {
@@ -964,9 +964,9 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC Brass Insert 90° Elbow",
     variants: [
-      { size: "3/4\"x1/2\" (30/pkt)", price: 85.00, mrp: 115.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRELB-3412" },
-      { size: "1\"x1/2\" (25/pkt)", price: 106.80, mrp: 145.00, stock: 25, unit: "Pcs", barcode: "LEO-UPVC-BRELB-112" },
-      { size: "1\"x3/4\" (15/pkt)", price: 125.00, mrp: 170.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-BRELB-134" }
+      { size: "3/4\"x1/2\"", price: 85.00, mrp: 115.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRELB-3412" },
+      { size: "1\"x1/2\"", price: 106.80, mrp: 145.00, stock: 25, unit: "Pcs", barcode: "LEO-UPVC-BRELB-112" },
+      { size: "1\"x3/4\"", price: 125.00, mrp: 170.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-BRELB-134" }
     ]
   },
   {
@@ -978,8 +978,8 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC Female Threaded Adaptor with Brass Insert",
     variants: [
-      { size: "3/4\"x1/2\" (30/pkt)", price: 78.00, mrp: 105.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRFTA-3412" },
-      { size: "1\"x1/2\" (30/pkt)", price: 90.00, mrp: 122.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRFTA-112" }
+      { size: "3/4\"x1/2\"", price: 78.00, mrp: 105.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRFTA-3412" },
+      { size: "1\"x1/2\"", price: 90.00, mrp: 122.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRFTA-112" }
     ]
   },
   {
@@ -991,9 +991,9 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC 3-Way Tee with Brass Insert",
     variants: [
-      { size: "3/4\"x1/2\" (30/pkt)", price: 100.00, mrp: 135.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRTEE-3412" },
-      { size: "1\"x1/2\" (20/pkt)", price: 110.00, mrp: 150.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-BRTEE-112" },
-      { size: "1\"x3/4\" (15/pkt)", price: 140.00, mrp: 190.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-BRTEE-134" }
+      { size: "3/4\"x1/2\"", price: 100.00, mrp: 135.00, stock: 30, unit: "Pcs", barcode: "LEO-UPVC-BRTEE-3412" },
+      { size: "1\"x1/2\"", price: 110.00, mrp: 150.00, stock: 20, unit: "Pcs", barcode: "LEO-UPVC-BRTEE-112" },
+      { size: "1\"x3/4\"", price: 140.00, mrp: 190.00, stock: 15, unit: "Pcs", barcode: "LEO-UPVC-BRTEE-134" }
     ]
   },
   {
@@ -1005,10 +1005,10 @@ const verifiedCatalog = [
     gstRate: 18,
     description: "uPVC Threaded plugs and cPVC to uPVC transition connectors",
     variants: [
-      { size: "1/2\" Plug (100/pkt)", price: 5.10, mrp: 7.50, stock: 100, unit: "Pcs", barcode: "LEO-PLUG-12" },
-      { size: "3/4\" Plug (50/pkt)", price: 7.20, mrp: 10.00, stock: 50, unit: "Pcs", barcode: "LEO-PLUG-34" },
-      { size: "3/4\"x3/4\" cPVC to uPVC Connector (50/pkt)", price: 25.70, mrp: 35.00, stock: 50, unit: "Pcs", barcode: "LEO-CONN-34" },
-      { size: "1\"x1\" cPVC to uPVC Connector (30/pkt)", price: 38.50, mrp: 52.00, stock: 30, unit: "Pcs", barcode: "LEO-CONN-1" }
+      { size: "1/2\" Plug", price: 5.10, mrp: 7.50, stock: 100, unit: "Pcs", barcode: "LEO-PLUG-12" },
+      { size: "3/4\" Plug", price: 7.20, mrp: 10.00, stock: 50, unit: "Pcs", barcode: "LEO-PLUG-34" },
+      { size: "3/4\"x3/4\" cPVC to uPVC Connector", price: 25.70, mrp: 35.00, stock: 50, unit: "Pcs", barcode: "LEO-CONN-34" },
+      { size: "1\"x1\" cPVC to uPVC Connector", price: 38.50, mrp: 52.00, stock: 30, unit: "Pcs", barcode: "LEO-CONN-1" }
     ]
   },
 

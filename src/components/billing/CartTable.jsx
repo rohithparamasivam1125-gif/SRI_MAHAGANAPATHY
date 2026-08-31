@@ -10,12 +10,14 @@ import {
   Sparkles,
   RotateCcw,
   Tag,
-  IndianRupee
+  IndianRupee,
+  Eye
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatCurrency } from '../../utils/formatters';
+import { getBrandTheme } from '../../utils/brandColorHelper';
 
-export const CartTable = ({ onOpenCheckout }) => {
+export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
   const { cart, updateCartItem, removeFromCart, clearCart, settings } = useApp();
 
   const [overallDiscount, setOverallDiscount] = useState(0);
@@ -105,6 +107,11 @@ export const CartTable = ({ onOpenCheckout }) => {
                       {item.name}
                     </h4>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                      {item.brand && (
+                        <span className={`text-xs font-black px-2 py-0.5 rounded border shadow-2xs ${getBrandTheme(item.brand, settings?.brandColors).badge}`}>
+                          🏷️ {item.brand}
+                        </span>
+                      )}
                       <span className="text-xs font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">
                         Size: {item.size}
                       </span>
@@ -308,14 +315,75 @@ export const CartTable = ({ onOpenCheckout }) => {
             </div>
           </div>
 
-          {/* Checkout Settle Button */}
-          <button
-            onClick={() => onOpenCheckout({ overallDiscount, overallDiscountType, overallDiscountAmt })}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-sm sm:text-base transition-all active:scale-98"
-          >
-            <span>Proceed to Checkout</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
+          {/* Action Buttons: Preview & Checkout Settle */}
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                const nextSeq = (settings?.invoiceSequence || 100) + 1;
+                const prefix = settings?.invoicePrefix || 'INV-';
+                const invNumber = `${prefix}${new Date().getFullYear()}-${String(nextSeq).padStart(4, '0')} (DRAFT PREVIEW)`;
+                
+                const finalizedItems = cart.map((item) => {
+                  const lineBase = item.price * item.qty;
+                  const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
+                  const lineTaxable = lineBase - itemDiscount;
+                  const itemTax = (lineTaxable * (item.gstRate !== undefined ? item.gstRate : 18)) / 100;
+                  return {
+                    ...item,
+                    lineBase,
+                    itemDiscount,
+                    lineTaxable,
+                    itemTax,
+                    lineTotal: lineTaxable + itemTax
+                  };
+                });
+                
+                const roundOff = Number((estimatedTotal - (netBeforeOverall - overallDiscountAmt)).toFixed(2));
+
+                const draftInvoice = {
+                  invoiceNumber: invNumber,
+                  date: new Date().toISOString(),
+                  customerName: 'Walk-in / Draft Customer',
+                  customerPhone: '',
+                  customerGstin: '',
+                  paymentMode: 'Cash',
+                  items: finalizedItems,
+                  totalItemsCount: cart.length,
+                  subtotal: Number(taxableAmount.toFixed(2)),
+                  totalTax: Number(totalTax.toFixed(2)),
+                  discountOverall: overallDiscountType === 'percent' ? Number(overallDiscount) || 0 : (netBeforeOverall > 0 ? Number(((overallDiscountAmt / netBeforeOverall) * 100).toFixed(2)) : 0),
+                  discountAmount: Number(overallDiscountAmt.toFixed(2)),
+                  roundOff,
+                  grandTotal: estimatedTotal,
+                  isGstBill: true,
+                  notes: '',
+                  shopDetails: {
+                    name: settings?.shopName,
+                    phone: settings?.phone,
+                    address: settings?.address,
+                    gstin: settings?.gstin
+                  }
+                };
+                if (onPreviewBill) {
+                  onPreviewBill(draftInvoice, { overallDiscount, overallDiscountType, overallDiscountAmt });
+                }
+              }}
+              className="w-1/3 py-3 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border-2 border-slate-300 hover:border-slate-400 font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs sm:text-sm transition-all active:scale-98"
+              title="Preview Bill in Fullscreen before finalizing"
+            >
+              <Eye className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>Preview</span>
+            </button>
+
+            <button
+              onClick={() => onOpenCheckout({ overallDiscount, overallDiscountType, overallDiscountAmt })}
+              className="flex-1 py-3 px-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-xs sm:text-base transition-all active:scale-98"
+            >
+              <span>Proceed to Checkout</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            </button>
+          </div>
 
         </div>
       )}

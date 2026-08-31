@@ -22,23 +22,94 @@
   background: #94a3b8;
 }
 
-/* Print Specific Rules */
+/* ============================================================
+   PRINT RULES — Browser handles all page breaks naturally
+   ============================================================ */
 @media print {
-  body {
+
+  /* Hide everything except the print document */
+  html, body, #root, #root > div, main {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     background: white !important;
-    color: black !important;
-    padding: 0 !important;
     margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
   }
+
+  /* Hide all UI chrome */
   .no-print {
     display: none !important;
   }
   .print-only {
     display: block !important;
   }
+
+  /* Fullscreen modal container: become a plain block for print */
+  .modal-fullscreen-container {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+    display: block !important;
+  }
+
+  /* Scroll canvas: become a plain block */
+  .print-scroll-canvas {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* The single print document fills the A4 page */
+  .print-document {
+    width: 210mm !important;
+    max-width: 210mm !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Inner content padding matches physical margins */
+  .print-document-inner {
+    padding: 8mm 10mm !important;
+  }
+
+  /* Page setup */
   @page {
-    margin: 10mm;
-    size: auto;
+    margin: 0;
+    size: A4 portrait;
+  }
+
+  /* Each table row: prevent splitting across pages */
+  .print-item-row {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Totals + Terms block: always kept on one page */
+  .print-totals-block {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* thead repeats on every printed page automatically */
+  .print-document table thead {
+    display: table-header-group;
+  }
+
+  /* tbody allows page breaks between rows */
+  .print-document table tbody {
+    display: table-row-group;
   }
 }
 

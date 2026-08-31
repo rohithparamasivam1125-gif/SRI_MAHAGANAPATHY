@@ -10,6 +10,7 @@ import {
   createInvoice as fsCreateInvoice,
   deleteInvoice as fsDeleteInvoice,
   createQuotation as fsCreateQuotation,
+  updateQuotation as fsUpdateQuotation,
   deleteQuotation as fsDeleteQuotation,
   getShopSettings,
   saveShopSettings
@@ -87,6 +88,7 @@ export const AppProvider = ({ children }) => {
   // Active Quotation Cart & Print View
   const [quotationCart, setQuotationCart] = useState([]);
   const [activeQuotationForPrint, setActiveQuotationForPrint] = useState(null);
+  const [editingQuotation, setEditingQuotation] = useState(null);
 
   // Statuses
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -282,12 +284,14 @@ export const AppProvider = ({ children }) => {
   const processCheckout = async ({ 
     customerName, 
     customerPhone, 
+    customerGstin,
     paymentMode, 
     notes, 
     discountOverall = 0, 
     discountType = 'percent', 
     discountAmountDirect = 0,
-    isGstBill = true 
+    isGstBill = true,
+    showDiscount = true
   }) => {
     if (cart.length === 0) {
       showToast('Cart is empty. Please add items to create a bill.', 'error');
@@ -305,7 +309,12 @@ export const AppProvider = ({ children }) => {
       const lineBase = item.price * item.qty;
       const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
       const lineTaxable = lineBase - itemDiscount;
-      const itemTax = isGstBill ? (lineTaxable * (item.gstRate || 0)) / 100 : 0;
+      const gstRate = item.gstRate !== undefined ? item.gstRate : 18;
+      const itemTax = isGstBill ? (lineTaxable * gstRate) / 100 : 0;
+      const cgstRate = gstRate / 2;
+      const sgstRate = gstRate / 2;
+      const cgstAmount = isGstBill ? Number((itemTax / 2).toFixed(2)) : 0;
+      const sgstAmount = isGstBill ? Number((itemTax / 2).toFixed(2)) : 0;
       const lineTotal = lineTaxable + itemTax;
 
       subtotal += lineTaxable;
@@ -313,6 +322,11 @@ export const AppProvider = ({ children }) => {
 
       return {
         ...item,
+        gstRate,
+        cgstRate,
+        sgstRate,
+        cgstAmount,
+        sgstAmount,
         lineBase,
         itemDiscount,
         lineTaxable,
@@ -335,22 +349,29 @@ export const AppProvider = ({ children }) => {
 
     const grandTotal = Math.round(netBeforeOverall - finalOverallDiscount);
     const roundOff = Number((grandTotal - (netBeforeOverall - finalOverallDiscount)).toFixed(2));
+    const cgstTotal = isGstBill ? Number((totalTax / 2).toFixed(2)) : 0;
+    const sgstTotal = isGstBill ? Number((totalTax / 2).toFixed(2)) : 0;
 
     const invoicePayload = {
       invoiceNumber: invNumber,
       date: new Date().toISOString(),
       customerName: customerName.trim() || 'Walk-in Customer',
       customerPhone: customerPhone.trim() || '',
+      customerGstin: customerGstin ? customerGstin.trim().toUpperCase() : '',
       paymentMode: paymentMode || 'Cash',
       items: finalizedItems,
       totalItemsCount: cart.length,
       subtotal: Number(subtotal.toFixed(2)),
       totalTax: Number(totalTax.toFixed(2)),
+      cgstAmount: cgstTotal,
+      sgstAmount: sgstTotal,
+      igstAmount: 0,
       discountOverall: finalDiscountPercent,
       discountAmount: Number(finalOverallDiscount.toFixed(2)),
       roundOff,
       grandTotal,
       isGstBill,
+      showDiscount: showDiscount !== false,
       notes: notes || '',
       shopDetails: {
         name: settings.shopName,
@@ -442,13 +463,15 @@ export const AppProvider = ({ children }) => {
   const processQuotation = async ({ 
     customerName, 
     customerPhone, 
+    customerGstin,
     siteLocation, 
     validityDays = 15, 
     notes, 
     discountOverall = 0, 
     discountType = 'percent',
     discountAmountDirect = 0,
-    isGstEstimate = true 
+    isGstEstimate = true,
+    showDiscount = true
   }) => {
     if (quotationCart.length === 0) {
       showToast('Quotation list is empty. Please add items first.', 'error');
@@ -466,7 +489,12 @@ export const AppProvider = ({ children }) => {
       const lineBase = item.price * item.qty;
       const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
       const lineTaxable = lineBase - itemDiscount;
-      const itemTax = isGstEstimate ? (lineTaxable * (item.gstRate !== undefined ? item.gstRate : 18)) / 100 : 0;
+      const gstRate = item.gstRate !== undefined ? item.gstRate : 18;
+      const itemTax = isGstEstimate ? (lineTaxable * gstRate) / 100 : 0;
+      const cgstRate = gstRate / 2;
+      const sgstRate = gstRate / 2;
+      const cgstAmount = isGstEstimate ? Number((itemTax / 2).toFixed(2)) : 0;
+      const sgstAmount = isGstEstimate ? Number((itemTax / 2).toFixed(2)) : 0;
       const lineTotal = lineTaxable + itemTax;
 
       subtotal += lineTaxable;
@@ -474,6 +502,11 @@ export const AppProvider = ({ children }) => {
 
       return {
         ...item,
+        gstRate,
+        cgstRate,
+        sgstRate,
+        cgstAmount,
+        sgstAmount,
         lineBase,
         itemDiscount,
         lineTaxable,
@@ -496,6 +529,8 @@ export const AppProvider = ({ children }) => {
 
     const grandTotal = Math.round(netBeforeOverall - finalOverallDiscount);
     const roundOff = Number((grandTotal - (netBeforeOverall - finalOverallDiscount)).toFixed(2));
+    const cgstTotal = isGstEstimate ? Number((totalTax / 2).toFixed(2)) : 0;
+    const sgstTotal = isGstEstimate ? Number((totalTax / 2).toFixed(2)) : 0;
 
     const validUntilDate = new Date();
     validUntilDate.setDate(validUntilDate.getDate() + Number(validityDays || 15));
@@ -507,16 +542,21 @@ export const AppProvider = ({ children }) => {
       validityDays: Number(validityDays || 15),
       customerName: customerName.trim() || 'Prospective Client',
       customerPhone: customerPhone.trim() || '',
+      customerGstin: customerGstin ? customerGstin.trim().toUpperCase() : '',
       siteLocation: siteLocation ? siteLocation.trim() : '',
       items: finalizedItems,
       totalItemsCount: quotationCart.length,
       subtotal: Number(subtotal.toFixed(2)),
       totalTax: Number(totalTax.toFixed(2)),
+      cgstAmount: cgstTotal,
+      sgstAmount: sgstTotal,
+      igstAmount: 0,
       discountOverall: finalDiscountPercent,
       discountAmount: Number(finalOverallDiscount.toFixed(2)),
       roundOff,
       grandTotal,
       isGstEstimate,
+      showDiscount: showDiscount !== false,
       notes: notes || '',
       status: 'Active', // 'Active' | 'Converted' | 'Expired'
       shopDetails: {
@@ -578,6 +618,151 @@ export const AppProvider = ({ children }) => {
     showToast(`Quotation #${quotation.quotationNumber} loaded into Counter Bill! Ready to checkout.`, 'success');
   };
 
+  // Load existing Quotation for editing
+  const loadQuotationForEdit = (quotation) => {
+    if (!quotation) return;
+    const cartItems = (quotation.items || []).map((item, idx) => ({
+      cartItemId: item.cartItemId || `${item.productId || 'quo_item'}_${item.size || 'std'}_${idx}`,
+      productId: item.productId || '',
+      name: item.name || '',
+      category: item.category || 'General',
+      brand: item.brand || '',
+      hsnCode: item.hsnCode || '',
+      gstRate: item.gstRate !== undefined ? item.gstRate : 18,
+      size: item.size || 'Standard',
+      unit: item.unit || 'Pcs',
+      price: Number(item.price) || 0,
+      mrp: Number(item.mrp) || Number(item.price) || 0,
+      qty: Number(item.qty) || 1,
+      discountPercent: Number(item.discountPercent) || 0,
+      availableStock: item.availableStock || 100
+    }));
+    setQuotationCart(cartItems);
+    setEditingQuotation(quotation);
+    setCurrentTab('quotations');
+    showToast(`Loaded Quotation #${quotation.quotationNumber} for editing.`, 'info');
+  };
+
+  const cancelQuotationEdit = () => {
+    setEditingQuotation(null);
+    clearQuotationCart();
+    showToast('Cancelled quotation edit mode.', 'info');
+  };
+
+  // Update existing Quotation in Firestore
+  const updateExistingQuotation = async ({ 
+    customerName, 
+    customerPhone, 
+    customerGstin,
+    siteLocation, 
+    validityDays = 15, 
+    notes, 
+    discountOverall = 0, 
+    discountType = 'percent',
+    discountAmountDirect = 0, 
+    isGstEstimate = true,
+    showDiscount = true
+  }) => {
+    if (!editingQuotation) {
+      showToast('No active quotation in edit mode.', 'error');
+      return null;
+    }
+    if (quotationCart.length === 0) {
+      showToast('Quotation list is empty. Please add items first.', 'error');
+      return null;
+    }
+
+    let subtotal = 0;
+    let totalTax = 0;
+
+    const finalizedItems = quotationCart.map((item) => {
+      const lineBase = item.price * item.qty;
+      const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
+      const lineTaxable = lineBase - itemDiscount;
+      const itemTax = isGstEstimate ? (lineTaxable * (item.gstRate !== undefined ? item.gstRate : 18)) / 100 : 0;
+      const lineTotal = lineTaxable + itemTax;
+
+      subtotal += lineTaxable;
+      totalTax += itemTax;
+
+      return {
+        ...item,
+        lineBase,
+        itemDiscount,
+        lineTaxable,
+        itemTax,
+        lineTotal
+      };
+    });
+
+    const netBeforeOverall = subtotal + totalTax;
+    let finalOverallDiscount = 0;
+    let finalDiscountPercent = 0;
+
+    if (discountType === 'amount') {
+      finalOverallDiscount = Math.min(netBeforeOverall, Math.max(0, Number(discountAmountDirect) || 0));
+      finalDiscountPercent = netBeforeOverall > 0 ? Number(((finalOverallDiscount / netBeforeOverall) * 100).toFixed(2)) : 0;
+    } else {
+      finalDiscountPercent = Number(discountOverall) || 0;
+      finalOverallDiscount = (netBeforeOverall * finalDiscountPercent) / 100;
+    }
+
+    const grandTotal = Math.round(netBeforeOverall - finalOverallDiscount);
+    const roundOff = Number((grandTotal - (netBeforeOverall - finalOverallDiscount)).toFixed(2));
+
+    const validUntilDate = new Date();
+    validUntilDate.setDate(validUntilDate.getDate() + Number(validityDays || 15));
+
+    const updatedPayload = {
+      quotationNumber: editingQuotation.quotationNumber,
+      date: editingQuotation.date || new Date().toISOString(),
+      customerName: customerName.trim() || 'Prospective Client',
+      customerPhone: customerPhone.trim() || '',
+      customerGstin: customerGstin ? customerGstin.trim().toUpperCase() : '',
+      siteLocation: siteLocation ? siteLocation.trim() : '',
+      validityDays: Number(validityDays || 15),
+      validUntil: validUntilDate.toISOString(),
+      items: finalizedItems,
+      totalItemsCount: quotationCart.length,
+      subtotal: Number(subtotal.toFixed(2)),
+      totalTax: Number(totalTax.toFixed(2)),
+      discountOverall: finalDiscountPercent,
+      discountAmount: Number(finalOverallDiscount.toFixed(2)),
+      roundOff,
+      grandTotal,
+      isGstEstimate,
+      showDiscount: showDiscount !== false,
+      notes: notes || '',
+      shopDetails: {
+        name: settings.shopName,
+        phone: settings.phone,
+        address: settings.address,
+        gstin: settings.gstin
+      }
+    };
+
+    try {
+      const docId = await fsUpdateQuotation(editingQuotation.id, updatedPayload);
+
+      const fullQuotation = {
+        ...editingQuotation,
+        ...updatedPayload,
+        id: docId || editingQuotation.id
+      };
+
+      setEditingQuotation(null);
+      clearQuotationCart();
+      setActiveQuotationForPrint(fullQuotation);
+      showToast(`Quotation #${editingQuotation.quotationNumber} updated successfully! Total: ₹${grandTotal}`, 'success');
+
+      return fullQuotation;
+    } catch (e) {
+      console.error('Quotation update error:', e);
+      showToast('Error updating quotation: ' + e.message, 'error');
+      throw e;
+    }
+  };
+
   const deleteQuotationRecord = async (id) => {
     try {
       await fsDeleteQuotation(id);
@@ -621,6 +806,11 @@ export const AppProvider = ({ children }) => {
         quotationCart,
         activeQuotationForPrint,
         setActiveQuotationForPrint,
+        editingQuotation,
+        setEditingQuotation,
+        loadQuotationForEdit,
+        cancelQuotationEdit,
+        updateExistingQuotation,
         isLoadingProducts,
         isFirebaseConnected,
         firebaseError,

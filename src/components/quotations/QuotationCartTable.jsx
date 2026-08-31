@@ -13,29 +13,56 @@ import {
   Calendar,
   Sparkles,
   Percent,
-  Tag
+  Tag,
+  Eye,
+  Edit3,
+  FileSpreadsheet
 } from 'lucide-react';
+import { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, capitalizeInput } from '../../utils/formatters';
+import { getBrandTheme } from '../../utils/brandColorHelper';
 
-export const QuotationCartTable = () => {
+export const QuotationCartTable = ({ onPreviewQuotation }) => {
   const { 
     quotationCart, 
     updateQuotationCartItem, 
     removeFromQuotationCart, 
     clearQuotationCart,
-    processQuotation 
+    processQuotation,
+    updateExistingQuotation,
+    editingQuotation,
+    cancelQuotationEdit,
+    settings 
   } = useApp();
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerGstin, setCustomerGstin] = useState('');
   const [siteLocation, setSiteLocation] = useState('');
   const [validityDays, setValidityDays] = useState(15);
   const [discountOverall, setDiscountOverall] = useState(0);
   const [discountOverallType, setDiscountOverallType] = useState('percent'); // 'percent' or 'amount'
   const [isGstEstimate, setIsGstEstimate] = useState(true);
+  const [showDiscount, setShowDiscount] = useState(true);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync form values when an existing quotation is loaded for editing
+  useEffect(() => {
+    if (editingQuotation) {
+      setCustomerName(editingQuotation.customerName || '');
+      setCustomerPhone(editingQuotation.customerPhone || '');
+      setCustomerGstin(editingQuotation.customerGstin || '');
+      setSiteLocation(editingQuotation.siteLocation || '');
+      setValidityDays(editingQuotation.validityDays || 15);
+      setDiscountOverall(editingQuotation.discountOverall || 0);
+      setDiscountOverallType('percent');
+      setIsGstEstimate(editingQuotation.isGstEstimate !== undefined ? editingQuotation.isGstEstimate : true);
+      setShowDiscount(editingQuotation.showDiscount !== undefined ? editingQuotation.showDiscount : true);
+      setNotes(editingQuotation.notes || '');
+    }
+  }, [editingQuotation]);
 
   // Calculations preserving custom product GST %
   const totalBase = quotationCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -61,26 +88,128 @@ export const QuotationCartTable = () => {
   }
   const estimatedTotal = Math.round(netBeforeOverall - overallDiscountAmt);
 
-  const handleGenerateQuotation = async (e) => {
-    e.preventDefault();
+  const handlePreviewQuotation = () => {
+    if (quotationCart.length === 0) return;
+
+    const nextSeq = (settings?.quotationSequence || 100) + 1;
+    const prefix = settings?.quotationPrefix || 'QUO-';
+    const quoNumber = editingQuotation 
+      ? `${editingQuotation.quotationNumber} (EDIT PREVIEW)`
+      : `${prefix}${new Date().getFullYear()}-${String(nextSeq).padStart(4, '0')} (DRAFT PREVIEW)`;
+
+    let subtotal = 0;
+    let totalTax = 0;
+
+    const finalizedItems = quotationCart.map((item) => {
+      const lineBase = item.price * item.qty;
+      const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
+      const lineTaxable = lineBase - itemDiscount;
+      const itemTax = isGstEstimate ? (lineTaxable * (item.gstRate !== undefined ? item.gstRate : 18)) / 100 : 0;
+      const lineTotal = lineTaxable + itemTax;
+
+      subtotal += lineTaxable;
+      totalTax += itemTax;
+
+      return {
+        ...item,
+        lineBase,
+        itemDiscount,
+        lineTaxable,
+        itemTax,
+        lineTotal
+      };
+    });
+
+    const netBeforeOverall = subtotal + totalTax;
+    let finalOverallDiscount = 0;
+    let finalDiscountPercent = 0;
+
+    if (discountOverallType === 'amount') {
+      finalOverallDiscount = Math.min(netBeforeOverall, Math.max(0, Number(discountOverall) || 0));
+      finalDiscountPercent = netBeforeOverall > 0 ? Number(((finalOverallDiscount / netBeforeOverall) * 100).toFixed(2)) : 0;
+    } else {
+      finalDiscountPercent = Number(discountOverall) || 0;
+      finalOverallDiscount = (netBeforeOverall * finalDiscountPercent) / 100;
+    }
+
+    const grandTotal = Math.round(netBeforeOverall - finalOverallDiscount);
+    const roundOff = Number((grandTotal - (netBeforeOverall - finalOverallDiscount)).toFixed(2));
+
+    const validUntilDate = new Date();
+    validUntilDate.setDate(validUntilDate.getDate() + Number(validityDays || 15));
+
+    const draftQuotation = {
+      quotationNumber: quoNumber,
+      date: new Date().toISOString(),
+      validUntil: validUntilDate.toISOString(),
+      validityDays: Number(validityDays || 15),
+      customerName: customerName.trim() || 'Prospective Client',
+      customerPhone: customerPhone.trim() || '',
+      customerGstin: customerGstin ? customerGstin.trim().toUpperCase() : '',
+      siteLocation: siteLocation ? siteLocation.trim() : '',
+      items: finalizedItems,
+      totalItemsCount: quotationCart.length,
+      subtotal: Number(subtotal.toFixed(2)),
+      totalTax: Number(totalTax.toFixed(2)),
+      discountOverall: finalDiscountPercent,
+      discountAmount: Number(finalOverallDiscount.toFixed(2)),
+      roundOff,
+      grandTotal,
+      isGstEstimate,
+      showDiscount,
+      notes: notes || '',
+      shopDetails: {
+        name: settings?.shopName,
+        phone: settings?.phone,
+        address: settings?.address,
+        gstin: settings?.gstin
+      }
+    };
+
+    if (onPreviewQuotation) {
+      onPreviewQuotation(draftQuotation, () => handleSaveOrUpdateQuotation({ preventDefault: () => {} }));
+    }
+  };
+
+  const handleSaveOrUpdateQuotation = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (quotationCart.length === 0) return;
 
     setIsSubmitting(true);
     try {
-      await processQuotation({
-        customerName,
-        customerPhone,
-        siteLocation,
-        validityDays: Number(validityDays) || 15,
-        discountOverall: discountOverallType === 'percent' ? Number(discountOverall) || 0 : 0,
-        discountType: discountOverallType,
-        discountAmountDirect: discountOverallType === 'amount' ? Number(discountOverall) || 0 : 0,
-        isGstEstimate,
-        notes
-      });
+      if (editingQuotation) {
+        await updateExistingQuotation({
+          customerName,
+          customerPhone,
+          customerGstin,
+          siteLocation,
+          validityDays: Number(validityDays) || 15,
+          discountOverall: discountOverallType === 'percent' ? Number(discountOverall) || 0 : 0,
+          discountType: discountOverallType,
+          discountAmountDirect: discountOverallType === 'amount' ? Number(discountOverall) || 0 : 0,
+          isGstEstimate,
+          showDiscount,
+          notes
+        });
+      } else {
+        await processQuotation({
+          customerName,
+          customerPhone,
+          customerGstin,
+          siteLocation,
+          validityDays: Number(validityDays) || 15,
+          discountOverall: discountOverallType === 'percent' ? Number(discountOverall) || 0 : 0,
+          discountType: discountOverallType,
+          discountAmountDirect: discountOverallType === 'amount' ? Number(discountOverall) || 0 : 0,
+          isGstEstimate,
+          showDiscount,
+          notes
+        });
+      }
       // Reset form
       setCustomerName('');
       setCustomerPhone('');
+      setCustomerGstin('');
       setSiteLocation('');
       setNotes('');
       setDiscountOverall(0);
@@ -93,27 +222,40 @@ export const QuotationCartTable = () => {
     <div className="flex flex-col h-full bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
       
       {/* Header */}
-      <div className="px-4 py-3.5 bg-gradient-to-r from-blue-900 to-indigo-900 text-white flex items-center justify-between">
+      <div className={`px-4 py-3.5 ${editingQuotation ? 'bg-gradient-to-r from-amber-700 to-orange-700' : 'bg-gradient-to-r from-blue-900 to-indigo-900'} text-white flex items-center justify-between transition-colors`}>
         <div className="flex items-center gap-2.5">
-          <FileText className="w-5 h-5 text-sky-400" />
+          {editingQuotation ? <Edit3 className="w-5 h-5 text-amber-300" /> : <FileText className="w-5 h-5 text-sky-400" />}
           <div>
-            <h2 className="font-black text-base leading-tight">Quotation Draft Builder</h2>
-            <p className="text-xs text-slate-300 font-semibold">
-              {quotationCart.length} item{quotationCart.length !== 1 ? 's' : ''} in proposal
+            <h2 className="font-black text-base leading-tight">
+              {editingQuotation ? `Editing #${editingQuotation.quotationNumber}` : 'Quotation Draft Builder'}
+            </h2>
+            <p className="text-xs text-slate-200 font-semibold">
+              {quotationCart.length} item{quotationCart.length !== 1 ? 's' : ''} {editingQuotation ? 'in modified proposal' : 'in proposal'}
             </p>
           </div>
         </div>
 
-        {quotationCart.length > 0 && (
-          <button
-            onClick={clearQuotationCart}
-            className="flex items-center gap-1 text-xs font-bold text-rose-300 hover:text-white hover:bg-rose-900/80 px-2.5 py-1 rounded-md transition-colors"
-            title="Clear all items from quotation"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {editingQuotation && (
+            <button
+              onClick={cancelQuotationEdit}
+              className="text-xs font-bold text-amber-200 hover:text-white hover:bg-black/30 px-2.5 py-1 rounded-md border border-amber-400/40 transition-colors"
+            >
+              Cancel Edit
+            </button>
+          )}
+
+          {quotationCart.length > 0 && !editingQuotation && (
+            <button
+              onClick={clearQuotationCart}
+              className="flex items-center gap-1 text-xs font-bold text-rose-300 hover:text-white hover:bg-rose-900/80 px-2.5 py-1 rounded-md transition-colors"
+              title="Clear all items from quotation"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Customer Info Mini-Form */}
@@ -125,7 +267,7 @@ export const QuotationCartTable = () => {
               type="text"
               placeholder="Client / Contractor Name"
               value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              onChange={(e) => setCustomerName(capitalizeInput(e.target.value))}
               className="w-full pl-8 pr-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -149,23 +291,37 @@ export const QuotationCartTable = () => {
               type="text"
               placeholder="Site / Project Location (e.g. Site 4)"
               value={siteLocation}
-              onChange={(e) => setSiteLocation(e.target.value)}
+              onChange={(e) => setSiteLocation(capitalizeInput(e.target.value))}
               className="w-full pl-8 pr-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="text-[11px] font-bold text-slate-500 shrink-0">Valid:</span>
-            <input
-              type="number"
-              min="1"
-              max="90"
-              value={validityDays}
-              onChange={(e) => setValidityDays(Number(e.target.value) || 15)}
-              className="w-14 px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-black font-mono-numbers text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <span className="text-[11px] text-slate-500 font-bold">days</span>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <FileSpreadsheet className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Client GSTIN (Optional)"
+                value={customerGstin}
+                onChange={(e) => setCustomerGstin(e.target.value.toUpperCase())}
+                maxLength={15}
+                className="w-full pl-8 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-500 shrink-0">Valid:</span>
+              <input
+                type="number"
+                min="1"
+                max="90"
+                value={validityDays}
+                onChange={(e) => setValidityDays(Number(e.target.value) || 15)}
+                className="w-11 px-1 py-1 bg-white border border-slate-200 rounded-lg text-xs font-black font-mono-numbers text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-[10px] text-slate-500 font-bold">d</span>
+            </div>
           </div>
         </div>
       </div>
@@ -200,6 +356,11 @@ export const QuotationCartTable = () => {
                       {item.name}
                     </h4>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                      {item.brand && (
+                        <span className={`text-[11px] font-black px-1.5 py-0.5 rounded border shadow-2xs ${getBrandTheme(item.brand, settings?.brandColors).badge}`}>
+                          🏷️ {item.brand}
+                        </span>
+                      )}
                       <span className="text-[11px] font-black text-blue-800 bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200">
                         {item.size}
                       </span>
@@ -395,6 +556,22 @@ export const QuotationCartTable = () => {
               )}
             </div>
 
+            {/* Show Discount Checkbox */}
+            <div className="flex items-center justify-between py-1 border-b border-dashed border-slate-200">
+              <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={showDiscount}
+                  onChange={(e) => setShowDiscount(e.target.checked)}
+                  className="rounded text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-xs font-black text-slate-800">Display Discount on Proposal / PDF</span>
+              </label>
+              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                {showDiscount ? 'Visible to client' : 'Hidden from client'}
+              </span>
+            </div>
+
             {overallDiscountAmt > 0 && (
               <div className="flex justify-between text-emerald-700 font-black">
                 <span>Overall Discount ({discountOverallType === 'percent' ? `${discountOverall}%` : `₹${discountOverall}`}):</span>
@@ -410,15 +587,35 @@ export const QuotationCartTable = () => {
             </div>
           </div>
 
-          {/* Settle / Print Button */}
-          <button
-            onClick={handleGenerateQuotation}
-            disabled={isSubmitting}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white font-black rounded-xl shadow-lg shadow-blue-700/30 flex items-center justify-center gap-2 text-sm sm:text-base transition-all active:scale-98 disabled:opacity-50"
-          >
-            <Printer className="w-5 h-5" />
-            <span>{isSubmitting ? 'Saving Proposal...' : 'Generate & Print Quotation'}</span>
-          </button>
+          {/* Action Buttons: Preview & Generate/Print */}
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={handlePreviewQuotation}
+              className="w-1/3 py-3.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border-2 border-slate-300 hover:border-slate-400 font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5 text-xs sm:text-sm transition-all active:scale-98"
+              title="Preview Proposal in Fullscreen before saving"
+            >
+              <Eye className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>Preview</span>
+            </button>
+
+            <button
+              onClick={handleSaveOrUpdateQuotation}
+              disabled={isSubmitting}
+              className={`flex-1 py-3.5 px-3.5 ${
+                editingQuotation
+                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 shadow-amber-600/30'
+                  : 'bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 shadow-blue-700/30'
+              } text-white font-black rounded-xl shadow-lg flex items-center justify-center gap-2 text-xs sm:text-base transition-all active:scale-98 disabled:opacity-50`}
+            >
+              {editingQuotation ? <Edit3 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> : <Printer className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />}
+              <span>
+                {isSubmitting
+                  ? (editingQuotation ? 'Updating Quotation...' : 'Saving...')
+                  : (editingQuotation ? `Update & Save #${editingQuotation.quotationNumber}` : 'Generate & Print')}
+              </span>
+            </button>
+          </div>
 
         </div>
       )}
