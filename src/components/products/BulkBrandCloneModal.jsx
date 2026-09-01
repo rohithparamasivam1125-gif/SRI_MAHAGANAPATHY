@@ -21,7 +21,9 @@ export const BulkBrandCloneModal = ({ isOpen, onClose }) => {
   // Extract unique existing brands
   const existingBrands = useMemo(() => {
     const brandMap = new Map();
-    products.forEach((p) => {
+    const list = Array.isArray(products) ? products : [];
+    list.forEach((p) => {
+      if (!p) return;
       const b = (p.brand || 'Unbranded').trim();
       brandMap.set(b, (brandMap.get(b) || 0) + 1);
     });
@@ -38,11 +40,12 @@ export const BulkBrandCloneModal = ({ isOpen, onClose }) => {
 
   // Source products to clone
   const sourceProducts = useMemo(() => {
-    return products.filter((p) => (p.brand || 'Unbranded').trim() === sourceBrand);
+    const list = Array.isArray(products) ? products : [];
+    return list.filter((p) => p && (p.brand || 'Unbranded').trim() === sourceBrand);
   }, [products, sourceBrand]);
 
   const totalVariantsCount = useMemo(() => {
-    return sourceProducts.reduce((acc, p) => acc + (p.variants?.length || 0), 0);
+    return sourceProducts.reduce((acc, p) => acc + (Array.isArray(p?.variants) ? p.variants.length : 0), 0);
   }, [sourceProducts]);
 
   if (!isOpen) return null;

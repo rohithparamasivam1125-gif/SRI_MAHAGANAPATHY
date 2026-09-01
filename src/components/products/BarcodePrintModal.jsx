@@ -35,21 +35,25 @@ export const BarcodePrintModal = ({ isOpen, onClose, products = [] }) => {
   // Flatten all variants with parent product info
   const allFlattenedItems = useMemo(() => {
     const list = [];
-    products.forEach((prod) => {
-      (prod.variants || []).forEach((v, idx) => {
-        const key = `${prod.id || prod.name}__${v.size}__${v.barcode || idx}`;
+    const prodList = Array.isArray(products) ? products : [];
+    prodList.forEach((prod) => {
+      if (!prod) return;
+      const variants = Array.isArray(prod.variants) ? prod.variants : [];
+      variants.forEach((v, idx) => {
+        if (!v) return;
+        const key = `${prod.id || prod.name || 'prod'}__${v.size || 'std'}__${v.barcode || idx}`;
         list.push({
           key,
-          productId: prod.id,
-          productName: prod.name,
-          category: prod.category,
-          subcategory: prod.subcategory,
-          brand: prod.brand,
-          size: v.size,
-          price: v.price,
-          mrp: v.mrp || v.price,
+          productId: prod.id || '',
+          productName: prod.name || 'Item',
+          category: prod.category || 'Electrical',
+          subcategory: prod.subcategory || '',
+          brand: prod.brand || '',
+          size: v.size || 'Standard',
+          price: Number(v.price) || 0,
+          mrp: Number(v.mrp || v.price) || 0,
           unit: v.unit || 'Pcs',
-          stock: v.stock || 0,
+          stock: Number(v.stock) || 0,
           barcode: v.barcode || `SMG-${Math.floor(100000 + Math.random() * 900000)}`
         });
       });
@@ -74,11 +78,15 @@ export const BarcodePrintModal = ({ isOpen, onClose, products = [] }) => {
       }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
+        const pName = (item.productName || '').toLowerCase();
+        const pBrand = (item.brand || '').toLowerCase();
+        const pSize = (item.size || '').toLowerCase();
+        const pBarcode = (item.barcode || '').toLowerCase();
         return (
-          item.productName.toLowerCase().includes(q) ||
-          (item.brand && item.brand.toLowerCase().includes(q)) ||
-          item.size.toLowerCase().includes(q) ||
-          item.barcode.toLowerCase().includes(q)
+          pName.includes(q) ||
+          pBrand.includes(q) ||
+          pSize.includes(q) ||
+          pBarcode.includes(q)
         );
       }
       return true;

@@ -94,6 +94,11 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
             const lineBase = item.price * item.qty;
             const lineDiscount = (lineBase * (item.discountPercent || 0)) / 100;
             const lineTotal = lineBase - lineDiscount;
+            const rawName = item.name || 'Item';
+            const spec = (item.size || item.spec || item.specification || '').trim();
+            const hasValidSpec = spec && !['standard', 'std', '-', 'default'].includes(spec.toLowerCase());
+            const isSpecAlreadyInName = hasValidSpec && rawName.toLowerCase().includes(spec.toLowerCase());
+            const fullItemTitle = (hasValidSpec && !isSpecAlreadyInName) ? `${spec} ${rawName}` : rawName;
 
             return (
               <div
@@ -104,14 +109,20 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h4 className="text-sm font-black text-slate-900 leading-snug">
-                      {item.name}
+                      {fullItemTitle}
                     </h4>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                      {item.brand && (
-                        <span className={`text-xs font-black px-2 py-0.5 rounded border shadow-2xs ${getBrandTheme(item.brand, settings?.brandColors).badge}`}>
-                          🏷️ {item.brand}
-                        </span>
-                      )}
+                      {item.brand && (() => {
+                        const brandTheme = getBrandTheme(item.brand, settings?.brandColors);
+                        return (
+                          <span 
+                            className={`text-xs font-black px-2 py-0.5 rounded border shadow-2xs ${brandTheme.badge}`}
+                            style={brandTheme.customStyle || {}}
+                          >
+                            🏷️ {item.brand}
+                          </span>
+                        );
+                      })()}
                       <span className="text-xs font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">
                         Size: {item.size}
                       </span>

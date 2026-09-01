@@ -10,7 +10,8 @@ import {
   Database, 
   Sparkles,
   FileText,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Smartphone
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -132,18 +133,7 @@ export const Navbar = () => {
               <span>Analytics</span>
             </button>
 
-            <button
-              onClick={() => setCurrentTab('gst-reports')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm sm:text-base font-bold transition-all ${
-                currentTab === 'gst-reports'
-                  ? 'bg-white text-blue-700 shadow-xs ring-1 ring-slate-200/60'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/60'
-              }`}
-              title="GST Monthly & Financial Year Reports for Auditor"
-            >
-              <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
-              <span>GST Reports</span>
-            </button>
+            {/* GST Reports is hidden as per client requirement */}
 
             <button
               onClick={() => setCurrentTab('settings')}
@@ -161,6 +151,7 @@ export const Navbar = () => {
 
           {/* Right Status Badges & Quick Action */}
           <div className="flex items-center gap-3">
+
             {/* Quick Seed Button if database is fresh/empty */}
             {products.length === 0 && (
               <button
@@ -173,19 +164,15 @@ export const Navbar = () => {
               </button>
             )}
 
-            {/* Cloud Firestore Connection Badge */}
+            {/* Storage Sync Badge - Red "Not synced to storage" */}
             <div 
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold border ${
-                isFirebaseConnected 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                  : 'bg-rose-50 text-rose-700 border-rose-200'
-              }`}
-              title={isFirebaseConnected ? 'Connected to Firebase Firestore' : 'Offline Mode (Local Cache Active)'}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold border bg-rose-50 text-rose-700 border-rose-200 shadow-xs"
+              title="Local 40-Day Temporary Cache Storage"
             >
-              <div className={`w-2.5 h-2.5 rounded-full ${isFirebaseConnected ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'}`} />
-              <Database className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {isFirebaseConnected ? 'Firebase Live' : 'Offline'}
+              <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+              <Database className="w-4 h-4 text-rose-600" />
+              <span className="font-bold">
+                Not synced to storage
               </span>
             </div>
           </div>

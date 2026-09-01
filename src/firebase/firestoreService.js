@@ -89,6 +89,36 @@ export const deleteProduct = async (id) => {
   await deleteDoc(docRef);
 };
 
+// Bulk delete products by brand name
+export const bulkDeleteProductsByBrand = async (brandName) => {
+  if (!brandName) return 0;
+  const cleanBrand = brandName.trim().toLowerCase();
+  const q = query(collection(db, PRODUCTS_COLLECTION));
+  const snapshot = await getDocs(q);
+  
+  const docsToDelete = snapshot.docs.filter((d) => {
+    const data = d.data();
+    return (data.brand || 'Unbranded').trim().toLowerCase() === cleanBrand;
+  });
+
+  if (docsToDelete.length === 0) return 0;
+
+  const chunkSize = 400;
+  let totalDeleted = 0;
+
+  for (let i = 0; i < docsToDelete.length; i += chunkSize) {
+    const chunk = docsToDelete.slice(i, i + chunkSize);
+    const batch = writeBatch(db);
+    chunk.forEach((d) => {
+      batch.delete(d.ref);
+    });
+    await batch.commit();
+    totalDeleted += chunk.length;
+  }
+
+  return totalDeleted;
+};
+
 // Batch insert products (e.g. from Excel or Seeding)
 export const bulkImportProducts = async (productsArray) => {
   if (!productsArray || productsArray.length === 0) return 0;
@@ -171,6 +201,51 @@ export const createInvoice = async (invoiceData) => {
 export const deleteInvoice = async (id) => {
   const docRef = doc(db, INVOICES_COLLECTION, id);
   await deleteDoc(docRef);
+};
+
+// Auto-purge invoices older than given days (default: 40 days)
+export const purgeExpiredInvoices = async (retentionDays = 40) => {
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+    const cutoffTime = cutoffDate.getTime();
+
+    const snapshot = await getDocs(collection(db, INVOICES_COLLECTION));
+    if (snapshot.empty) return 0;
+
+    let deletedCount = 0;
+    const batch = writeBatch(db);
+    let hasBatchOperations = false;
+
+    snapshot.docs.forEach((docSnap) => {
+      const data = docSnap.data();
+      let invoiceTime = null;
+
+      if (data.date) {
+        invoiceTime = new Date(data.date).getTime();
+      } else if (data.createdAt?.toDate) {
+        invoiceTime = data.createdAt.toDate().getTime();
+      } else if (data.createdAt?.seconds) {
+        invoiceTime = data.createdAt.seconds * 1000;
+      }
+
+      if (invoiceTime && invoiceTime < cutoffTime) {
+        batch.delete(docSnap.ref);
+        hasBatchOperations = true;
+        deletedCount++;
+      }
+    });
+
+    if (hasBatchOperations) {
+      await batch.commit();
+      console.log(`[Auto-Purge] Automatically deleted ${deletedCount} invoices older than ${retentionDays} days.`);
+    }
+
+    return deletedCount;
+  } catch (error) {
+    console.error('Failed to purge expired invoices:', error);
+    return 0;
+  }
 };
 
 // ==========================================
@@ -263,6 +338,46 @@ export const saveShopSettings = async (settings) => {
   const docRef = doc(db, SETTINGS_COLLECTION, SETTINGS_DOC_ID);
   await setDoc(docRef, {
     ...settings,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+};
+
+// ==========================================
+// SYSTEM / APP LOCK SERVICE
+// ==========================================
+
+const SYSTEM_COLLECTION = 'system_control';
+const APP_STATUS_DOC_ID = 'app_status';
+
+export const subscribeToAppStatus = (onData, onError) => {
+  try {
+    const docRef = doc(db, SYSTEM_COLLECTION, APP_STATUS_DOC_ID);
+    return onSnapshot(
+      docRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          onData({ id: snapshot.id, ...snapshot.data() });
+        } else {
+          // Default: App is active / unlocked
+          onData({ isLocked: false });
+        }
+      },
+      (error) => {
+        console.error('Firestore App Status subscription error:', error);
+        if (onError) onError(error);
+      }
+    );
+  } catch (error) {
+    console.error('Failed to subscribe to app status:', error);
+    if (onError) onError(error);
+    return () => {};
+  }
+};
+
+export const updateAppStatus = async (statusData) => {
+  const docRef = doc(db, SYSTEM_COLLECTION, APP_STATUS_DOC_ID);
+  await setDoc(docRef, {
+    ...statusData,
     updatedAt: serverTimestamp(),
   }, { merge: true });
 };

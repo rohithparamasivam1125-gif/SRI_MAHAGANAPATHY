@@ -3,12 +3,16 @@ import {
   subscribeToProducts, 
   subscribeToInvoices, 
   subscribeToQuotations,
+  subscribeToAppStatus,
+  updateAppStatus,
   addProduct as fsAddProduct, 
   updateProduct as fsUpdateProduct, 
   deleteProduct as fsDeleteProduct, 
+  bulkDeleteProductsByBrand,
   bulkImportProducts,
   createInvoice as fsCreateInvoice,
   deleteInvoice as fsDeleteInvoice,
+  purgeExpiredInvoices,
   createQuotation as fsCreateQuotation,
   updateQuotation as fsUpdateQuotation,
   deleteQuotation as fsDeleteQuotation,
@@ -17,6 +21,41 @@ import {
 } from '../firebase/firestoreService';
 import { DEFAULT_PRODUCTS } from '../data/defaultProducts';
 import { generateInvoiceNumber } from '../utils/formatters';
+
+export const RETENTION_DAYS = 40;
+
+export const getInvoiceExpiryInfo = (inv, retentionDays = RETENTION_DAYS) => {
+  let createdTime = null;
+  if (inv?.date) {
+    createdTime = new Date(inv.date).getTime();
+  } else if (inv?.createdAt?.toDate) {
+    createdTime = inv.createdAt.toDate().getTime();
+  } else if (inv?.createdAt?.seconds) {
+    createdTime = inv.createdAt.seconds * 1000;
+  } else {
+    createdTime = Date.now();
+  }
+
+  const expiryTimestamp = createdTime + (retentionDays * 24 * 60 * 60 * 1000);
+  const expiryDate = new Date(expiryTimestamp);
+  const diffMs = expiryTimestamp - Date.now();
+  const daysLeft = Math.max(0, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
+  const isExpired = diffMs <= 0;
+
+  return {
+    createdTime,
+    expiryDate,
+    expiryTimestamp,
+    daysLeft,
+    isExpired,
+    retentionDays
+  };
+};
+
+const filterValidInvoices = (list) => {
+  if (!Array.isArray(list)) return [];
+  return list.filter((inv) => !getInvoiceExpiryInfo(inv).isExpired);
+};
 
 const AppContext = createContext();
 
@@ -63,7 +102,7 @@ export const AppProvider = ({ children }) => {
   const [invoices, setInvoices] = useState(() => {
     try {
       const cached = localStorage.getItem('mahaganapathy_cached_invoices') || localStorage.getItem('rajaganapathy_cached_invoices');
-      return cached ? JSON.parse(cached) : [];
+      return cached ? filterValidInvoices(JSON.parse(cached)) : [];
     } catch {
       return [];
     }
@@ -95,6 +134,7 @@ export const AppProvider = ({ children }) => {
   const [isFirebaseConnected, setIsFirebaseConnected] = useState(true);
   const [firebaseError, setFirebaseError] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+  const [appStatus, setAppStatus] = useState({ isLocked: false });
 
   const showToast = (msg, type = 'success') => {
     setToastMessage({ message: msg, type });
@@ -136,8 +176,14 @@ export const AppProvider = ({ children }) => {
     const unsubInvoices = subscribeToInvoices(
       (data) => {
         if (!isMounted) return;
-        setInvoices(data);
-        localStorage.setItem('mahaganapathy_cached_invoices', JSON.stringify(data));
+        const validList = filterValidInvoices(data);
+        setInvoices(validList);
+        localStorage.setItem('mahaganapathy_cached_invoices', JSON.stringify(validList));
+        
+        // Auto purge expired bills older than 40 days from cloud Firestore in background
+        purgeExpiredInvoices(RETENTION_DAYS).catch((err) => {
+          console.warn('Auto purge error:', err);
+        });
       },
       (error) => {
         console.warn('Firestore Invoices Error:', error);
@@ -156,6 +202,17 @@ export const AppProvider = ({ children }) => {
       }
     );
 
+    // Subscribe to Remote App Status (Kill switch / Lock)
+    const unsubAppStatus = subscribeToAppStatus(
+      (data) => {
+        if (!isMounted) return;
+        setAppStatus(data || { isLocked: false });
+      },
+      (error) => {
+        console.warn('Firestore App Status Error:', error);
+      }
+    );
+
     // Load Settings
     getShopSettings().then((remoteSettings) => {
       if (remoteSettings && isMounted) {
@@ -169,6 +226,7 @@ export const AppProvider = ({ children }) => {
       unsubProducts();
       unsubInvoices();
       unsubQuotations();
+      unsubAppStatus();
     };
   }, []);
 
@@ -218,6 +276,28 @@ export const AppProvider = ({ children }) => {
       showToast('Product removed from database.', 'success');
     } catch (e) {
       showToast('Error deleting product: ' + e.message, 'error');
+    }
+  };
+
+  const handleDeleteBrand = async (brandName) => {
+    try {
+      if (!brandName) return 0;
+      showToast(`Deleting all products under brand "${brandName}"...`, 'info');
+      const deletedCount = await bulkDeleteProductsByBrand(brandName);
+      
+      // Remove brand color from settings if present
+      const updatedBrandColors = { ...(settings.brandColors || {}) };
+      delete updatedBrandColors[brandName];
+      const newSettings = { ...settings, brandColors: updatedBrandColors };
+      await saveShopSettings(newSettings);
+      setSettings(newSettings);
+
+      showToast(`Brand "${brandName}" and ${deletedCount} products deleted successfully!`, 'success');
+      return deletedCount;
+    } catch (e) {
+      console.error('Error deleting brand:', e);
+      showToast('Failed to delete brand products: ' + e.message, 'error');
+      throw e;
     }
   };
 
@@ -791,6 +871,24 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const toggleAppLock = async (locked) => {
+    try {
+      await updateAppStatus({
+        isLocked: locked,
+        updatedAt: new Date().toISOString()
+      });
+      showToast(
+        locked 
+          ? 'Application status set to: BLOCKED / HALTED' 
+          : 'Application status set to: ACTIVE / UNLOCKED',
+        locked ? 'error' : 'success'
+      );
+    } catch (e) {
+      showToast('Error updating App Status: ' + e.message, 'error');
+      throw e;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -816,10 +914,13 @@ export const AppProvider = ({ children }) => {
         firebaseError,
         toastMessage,
         showToast,
+        appStatus,
+        toggleAppLock,
         seedStarterProducts,
         handleAddProduct,
         handleUpdateProduct,
         handleDeleteProduct,
+        handleDeleteBrand,
         addToCart,
         updateCartItem,
         removeFromCart,

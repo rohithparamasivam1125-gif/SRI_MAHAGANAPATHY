@@ -355,8 +355,19 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
             </div>
           </div>
 
+          {/* 40-Day Expiry & Auto-Delete Information */}
+          <div className="flex items-center gap-2 p-2.5 bg-amber-50/80 border border-amber-200/80 rounded-xl text-amber-900 text-xs">
+            <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="leading-tight">
+              <span className="font-bold">40-Day Auto Retention:</span>{' '}
+              <span className="text-slate-600">
+                This bill will remain available for 40 days (auto-deletes on {new Date(Date.now() + 40 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}).
+              </span>
+            </div>
+          </div>
+
           {/* Action Buttons */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center gap-3 pt-1">
             <button
               type="button"
               onClick={onClose}
@@ -370,7 +381,7 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
               className="w-2/3 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-50"
             >
               <Printer className="w-4 h-4" />
-              <span>{isSubmitting ? 'Saving to Firebase...' : 'Save & Print Invoice'}</span>
+              <span>{isSubmitting ? 'Saving Invoice...' : 'Save & Print Invoice'}</span>
             </button>
           </div>
 

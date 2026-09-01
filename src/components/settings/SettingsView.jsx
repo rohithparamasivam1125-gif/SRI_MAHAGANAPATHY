@@ -16,7 +16,11 @@ import {
   CheckCircle,
   Receipt,
   Palette,
-  Tag
+  Tag,
+  Trash2,
+  Loader2,
+  Zap,
+  Droplets
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { getActiveFirebaseConfig } from '../../firebase/firebaseConfig';
@@ -29,16 +33,74 @@ export const SettingsView = () => {
     updateShopSettings, 
     seedStarterProducts, 
     isFirebaseConnected, 
-    showToast 
+    showToast,
+    handleDeleteBrand
   } = useApp();
+
+  const [deletingBrand, setDeletingBrand] = useState(null);
+  const [brandCategoryFilter, setBrandCategoryFilter] = useState('ALL'); // 'ALL' | 'Electrical' | 'Plumbing'
+
+  const categoryBrandStats = useMemo(() => {
+    const electricalBrands = new Set();
+    const plumbingBrands = new Set();
+    const allBrands = new Set();
+
+    (products || []).forEach((p) => {
+      if (!p || !p.brand || !p.brand.trim()) return;
+      const b = p.brand.trim();
+      allBrands.add(b);
+      if (p.category === 'Electrical') electricalBrands.add(b);
+      if (p.category === 'Plumbing') plumbingBrands.add(b);
+    });
+
+    return {
+      all: allBrands.size,
+      electrical: electricalBrands.size,
+      plumbing: plumbingBrands.size
+    };
+  }, [products]);
+
+  const filteredBrands = useMemo(() => {
+    const brandMap = new Map();
+    (products || []).forEach((p) => {
+      if (!p || !p.brand || !p.brand.trim()) return;
+      if (brandCategoryFilter === 'ALL' || p.category === brandCategoryFilter) {
+        const b = p.brand.trim();
+        brandMap.set(b, (brandMap.get(b) || 0) + 1);
+      }
+    });
+    return Array.from(brandMap.keys()).sort();
+  }, [products, brandCategoryFilter]);
 
   const uniqueBrands = useMemo(() => {
     const brandSet = new Set();
-    products.forEach((p) => {
-      if (p.brand && p.brand.trim()) brandSet.add(p.brand.trim());
+    (products || []).forEach((p) => {
+      if (p && p.brand && p.brand.trim()) brandSet.add(p.brand.trim());
     });
     return Array.from(brandSet).sort();
   }, [products]);
+
+  const handleDeleteBrandClick = async (brandName) => {
+    const brandProducts = (products || []).filter(
+      (p) => (p.brand || 'Unbranded').trim().toLowerCase() === brandName.toLowerCase()
+    );
+    const count = brandProducts.length;
+
+    const confirmMsg = count > 0
+      ? `Are you sure you want to permanently delete brand "${brandName}" and ALL ${count} product(s) associated with it?\n\nThis will remove all products under this brand from the system.`
+      : `Are you sure you want to delete brand "${brandName}"?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      setDeletingBrand(brandName);
+      await handleDeleteBrand(brandName);
+    } catch (err) {
+      console.error('Delete brand error:', err);
+    } finally {
+      setDeletingBrand(null);
+    }
+  };
 
   const [formData, setFormData] = useState({
     shopName: settings.shopName || 'Sri Mahaganapathy Electricals and Hardware',
@@ -294,21 +356,63 @@ export const SettingsView = () => {
                   </label>
                 </div>
                 <span className="text-[10px] font-bold text-slate-500 font-mono">
-                  {uniqueBrands.length} brand{uniqueBrands.length !== 1 ? 's' : ''} detected
+                  {filteredBrands.length} brand{filteredBrands.length !== 1 ? 's' : ''} shown
                 </span>
               </div>
               
               <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                Assign a custom color theme to each brand. These colors will highlight on product cards, size buttons, cart items, and invoices.
+                Assign a custom color theme to each brand. Filter by Electrical or Plumbing to manage specific brand catalogs.
               </p>
 
-              {uniqueBrands.length === 0 ? (
-                <p className="text-xs text-slate-400 font-bold italic py-2">
-                  No brands created yet. Add products with brand names in Product Master to customize their colors here.
+              {/* Electrical and Plumbing Toggle Switcher */}
+              <div className="flex items-center gap-1.5 bg-slate-200/80 p-1.5 rounded-xl border border-slate-300/60 flex-wrap sm:flex-nowrap">
+                <button
+                  type="button"
+                  onClick={() => setBrandCategoryFilter('ALL')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                    brandCategoryFilter === 'ALL'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900 hover:bg-white/40'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>All ({categoryBrandStats.all})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBrandCategoryFilter('Electrical')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                    brandCategoryFilter === 'Electrical'
+                      ? 'bg-amber-500 text-slate-950 shadow-xs'
+                      : 'text-amber-900 hover:bg-amber-100/60'
+                  }`}
+                >
+                  <Zap className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
+                  <span>Electrical ({categoryBrandStats.electrical})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBrandCategoryFilter('Plumbing')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                    brandCategoryFilter === 'Plumbing'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-blue-900 hover:bg-blue-100/60'
+                  }`}
+                >
+                  <Droplets className="w-3.5 h-3.5 fill-blue-500 text-blue-600" />
+                  <span>Plumbing ({categoryBrandStats.plumbing})</span>
+                </button>
+              </div>
+
+              {filteredBrands.length === 0 ? (
+                <p className="text-xs text-slate-400 font-bold italic py-3 text-center">
+                  No {brandCategoryFilter !== 'ALL' ? brandCategoryFilter : ''} brands found. Add products with brand names in Product Master to customize their colors here.
                 </p>
               ) : (
                 <div className="space-y-2 pt-1">
-                  {uniqueBrands.map((b) => {
+                  {filteredBrands.map((b) => {
                     const currentTheme = getBrandTheme(b, formData.brandColors);
                     const selectedKey = formData.brandColors?.[b] || currentTheme.key;
 
@@ -318,7 +422,10 @@ export const SettingsView = () => {
                         className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 bg-white rounded-xl border border-slate-200 shadow-2xs hover:border-slate-300 transition-all"
                       >
                         <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-md border shadow-2xs ${currentTheme.badge}`}>
+                          <span 
+                            className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-md border shadow-2xs ${currentTheme.badge}`}
+                            style={currentTheme.customStyle || {}}
+                          >
                             <Tag className="w-3 h-3" />
                             <span>{b}</span>
                           </span>
@@ -327,7 +434,7 @@ export const SettingsView = () => {
                           </span>
                         </div>
 
-                        {/* Color Swatches */}
+                        {/* Color Swatches + Custom Color Picker */}
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {Object.values(BRAND_COLOR_PALETTES).map((pal) => {
                             const isPicked = selectedKey === pal.key;
@@ -348,6 +455,43 @@ export const SettingsView = () => {
                               </button>
                             );
                           })}
+
+                          {/* Custom Hex Color Picker */}
+                          <label 
+                            className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all shadow-2xs hover:scale-110 ml-1 ${
+                              selectedKey?.startsWith('#') 
+                                ? 'border-slate-900 ring-2 ring-blue-500/50 scale-110' 
+                                : 'border-dashed border-slate-300 hover:border-slate-400 bg-slate-50'
+                            }`}
+                            style={selectedKey?.startsWith('#') ? { backgroundColor: selectedKey } : {}}
+                            title="Choose Custom Color (Spectrum Picker)"
+                          >
+                            <input
+                              type="color"
+                              value={selectedKey?.startsWith('#') ? selectedKey : currentTheme.hex}
+                              onChange={(e) => handleBrandColorChange(b, e.target.value)}
+                              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                            />
+                            <Palette className={`w-3.5 h-3.5 ${selectedKey?.startsWith('#') ? 'text-white drop-shadow-xs' : 'text-slate-600'}`} />
+                          </label>
+
+                          <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
+
+                          {/* Delete Brand & All Products Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteBrandClick(b)}
+                            disabled={deletingBrand === b}
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all text-xs font-bold disabled:opacity-50"
+                            title={`Delete brand "${b}" and all its products`}
+                          >
+                            {deletingBrand === b ? (
+                              <Loader2 className="w-3.5 h-3.5 text-rose-600 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                            )}
+                            <span className="hidden sm:inline text-rose-600">Delete Brand</span>
+                          </button>
                         </div>
                       </div>
                     );
@@ -410,7 +554,11 @@ export const SettingsView = () => {
                   {uniqueBrands.map((b) => {
                     const theme = getBrandTheme(b, formData.brandColors);
                     return (
-                      <span key={b} className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-md border shadow-2xs ${theme.badge}`}>
+                      <span 
+                        key={b} 
+                        className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-md border shadow-2xs ${theme.badge}`}
+                        style={theme.customStyle || {}}
+                      >
                         <Tag className="w-3 h-3" />
                         <span>{b}</span>
                       </span>

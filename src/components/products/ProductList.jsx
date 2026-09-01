@@ -51,16 +51,19 @@ export const ProductList = () => {
   const [expandedRowId, setExpandedRowId] = useState(null);
 
   const categoryCounts = useMemo(() => {
+    const list = Array.isArray(products) ? products : [];
     return {
-      electrical: products.filter((p) => p.category === 'Electrical').length,
-      plumbing: products.filter((p) => p.category === 'Plumbing').length,
+      electrical: list.filter((p) => p && p.category === 'Electrical').length,
+      plumbing: list.filter((p) => p && p.category === 'Plumbing').length,
     };
   }, [products]);
 
   // Extract unique brands
   const availableBrands = useMemo(() => {
     const brandMap = new Map();
-    products.forEach((p) => {
+    const list = Array.isArray(products) ? products : [];
+    list.forEach((p) => {
+      if (!p) return;
       if (selectedCategory === 'ALL' || p.category === selectedCategory) {
         const b = (p.brand || 'Unbranded').trim();
         brandMap.set(b, (brandMap.get(b) || 0) + 1);
@@ -77,7 +80,9 @@ export const ProductList = () => {
 
   // Filtered list
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+    const list = Array.isArray(products) ? products : [];
+    return list.filter((p) => {
+      if (!p) return false;
       if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
         return false;
       }
@@ -91,7 +96,7 @@ export const ProductList = () => {
         const matchBrand = p.brand?.toLowerCase().includes(q);
         const matchCategory = p.category?.toLowerCase().includes(q);
         const matchSub = p.subcategory?.toLowerCase().includes(q);
-        const matchSize = p.variants?.some((v) => v.size?.toLowerCase().includes(q));
+        const matchSize = Array.isArray(p.variants) && p.variants.some((v) => v && v.size?.toLowerCase().includes(q));
         return matchName || matchBrand || matchCategory || matchSub || matchSize;
       }
       return true;
@@ -330,8 +335,8 @@ export const ProductList = () => {
               <tbody className="divide-y divide-slate-200">
                 {filteredProducts.map((prod) => {
                   const isExpanded = expandedRowId === prod.id;
-                  const variants = prod.variants || [];
-                  const prices = variants.map((v) => v.price);
+                  const variants = Array.isArray(prod?.variants) ? prod.variants : [];
+                  const prices = variants.map((v) => Number(v?.price) || 0).filter(p => !isNaN(p));
                   const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
                   const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
 
@@ -371,10 +376,18 @@ export const ProductList = () => {
 
                         <td className="py-3.5 px-3 font-bold text-slate-800">
                           {prod.brand ? (
-                            <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-md border shadow-2xs ${getBrandTheme(prod.brand, settings?.brandColors).badge}`}>
-                              <Tag className="w-3 h-3" />
-                              <span>{prod.brand}</span>
-                            </span>
+                            (() => {
+                              const brandTheme = getBrandTheme(prod.brand, settings?.brandColors);
+                              return (
+                                <span 
+                                  className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-0.5 rounded-md border shadow-2xs ${brandTheme.badge}`}
+                                  style={brandTheme.customStyle || {}}
+                                >
+                                  <Tag className="w-3 h-3" />
+                                  <span>{prod.brand}</span>
+                                </span>
+                              );
+                            })()
                           ) : (
                             <span className="text-slate-400 font-bold">-</span>
                           )}
@@ -482,34 +495,42 @@ export const ProductList = () => {
       </div>
 
       {/* Add / Edit / Clone Product Modal */}
-      <ProductModal
-        isOpen={isProductModalOpen}
-        onClose={() => {
-          setIsProductModalOpen(false);
-          setIsCloningProduct(false);
-        }}
-        editingProduct={editingProduct}
-        isCloning={isCloningProduct}
-      />
+      {isProductModalOpen && (
+        <ProductModal
+          isOpen={isProductModalOpen}
+          onClose={() => {
+            setIsProductModalOpen(false);
+            setIsCloningProduct(false);
+          }}
+          editingProduct={editingProduct}
+          isCloning={isCloningProduct}
+        />
+      )}
 
       {/* Bulk Brand Catalog Cloner Modal */}
-      <BulkBrandCloneModal
-        isOpen={isCloneModalOpen}
-        onClose={() => setIsCloneModalOpen(false)}
-      />
+      {isCloneModalOpen && (
+        <BulkBrandCloneModal
+          isOpen={isCloneModalOpen}
+          onClose={() => setIsCloneModalOpen(false)}
+        />
+      )}
 
       {/* Excel Importer Modal */}
-      <ExcelImportModal
-        isOpen={isExcelModalOpen}
-        onClose={() => setIsExcelModalOpen(false)}
-      />
+      {isExcelModalOpen && (
+        <ExcelImportModal
+          isOpen={isExcelModalOpen}
+          onClose={() => setIsExcelModalOpen(false)}
+        />
+      )}
 
       {/* Barcode & Label Printer Modal */}
-      <BarcodePrintModal
-        isOpen={isBarcodeModalOpen}
-        onClose={() => setIsBarcodeModalOpen(false)}
-        products={products}
-      />
+      {isBarcodeModalOpen && (
+        <BarcodePrintModal
+          isOpen={isBarcodeModalOpen}
+          onClose={() => setIsBarcodeModalOpen(false)}
+          products={products}
+        />
+      )}
 
     </div>
   );

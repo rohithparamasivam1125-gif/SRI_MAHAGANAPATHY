@@ -93,9 +93,32 @@ export const getBrandTheme = (brandName, brandColorsConfig = {}) => {
   }
 
   // 1. Check user preference from settings
-  const customKey = brandColorsConfig[cleanBrand];
-  if (customKey && BRAND_COLOR_PALETTES[customKey]) {
-    return BRAND_COLOR_PALETTES[customKey];
+  if (brandColorsConfig && typeof brandColorsConfig === 'object') {
+    const customKey = brandColorsConfig[cleanBrand];
+    if (customKey) {
+      if (BRAND_COLOR_PALETTES[customKey]) {
+        return BRAND_COLOR_PALETTES[customKey];
+      }
+      // If user selected a custom hex color (e.g. #e11d48, #2563eb)
+      if (typeof customKey === 'string' && customKey.startsWith('#')) {
+        const hex = customKey.toLowerCase();
+        return {
+          key: hex,
+          label: hex.toUpperCase(),
+          hex: hex,
+          isCustom: true,
+          badge: 'border font-black shadow-2xs',
+          customStyle: {
+            backgroundColor: `${hex}18`,
+            color: hex,
+            borderColor: `${hex}60`
+          },
+          cardBorder: 'hover:border-slate-400',
+          cardTopBar: 'bg-slate-900',
+          iconColor: 'text-slate-800'
+        };
+      }
+    }
   }
 
   // 2. Predictable color based on brand name string
