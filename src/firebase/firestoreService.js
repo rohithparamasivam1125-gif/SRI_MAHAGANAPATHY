@@ -147,6 +147,45 @@ export const bulkImportProducts = async (productsArray) => {
   return totalImported;
 };
 
+// Deduplicate products in Firestore by name & brand
+export const deduplicateProducts = async () => {
+  const snapshot = await getDocs(collection(db, PRODUCTS_COLLECTION));
+  if (snapshot.empty) return 0;
+
+  const seenKeys = new Set();
+  const duplicateDocRefs = [];
+
+  snapshot.docs.forEach((docSnap) => {
+    const data = docSnap.data();
+    const cleanName = (data.name || '').trim().toLowerCase();
+    const cleanBrand = (data.brand || 'Unbranded').trim().toLowerCase();
+    const key = `${cleanName}___${cleanBrand}`;
+
+    if (seenKeys.has(key)) {
+      duplicateDocRefs.push(docSnap.ref);
+    } else {
+      seenKeys.add(key);
+    }
+  });
+
+  if (duplicateDocRefs.length === 0) return 0;
+
+  const chunkSize = 400;
+  let totalDeleted = 0;
+
+  for (let i = 0; i < duplicateDocRefs.length; i += chunkSize) {
+    const chunk = duplicateDocRefs.slice(i, i + chunkSize);
+    const batch = writeBatch(db);
+    chunk.forEach((ref) => {
+      batch.delete(ref);
+    });
+    await batch.commit();
+    totalDeleted += chunk.length;
+  }
+
+  return totalDeleted;
+};
+
 // ==========================================
 // INVOICES SERVICE
 // ==========================================
@@ -196,6 +235,26 @@ export const createInvoice = async (invoiceData) => {
 
   await batch.commit();
   return invoiceDocRef.id;
+};
+
+export const updateInvoice = async (id, invoiceData) => {
+  let docId = id;
+  if (!docId && invoiceData.invoiceNumber) {
+    const q = query(collection(db, INVOICES_COLLECTION), where('invoiceNumber', '==', invoiceData.invoiceNumber));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      docId = snap.docs[0].id;
+    }
+  }
+  if (!docId) {
+    throw new Error('Invoice ID not found to update.');
+  }
+  const docRef = doc(db, INVOICES_COLLECTION, docId);
+  await updateDoc(docRef, {
+    ...invoiceData,
+    updatedAt: serverTimestamp(),
+  });
+  return docId;
 };
 
 export const deleteInvoice = async (id) => {

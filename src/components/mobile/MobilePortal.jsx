@@ -702,6 +702,17 @@ export const MobilePortal = () => {
 
         </div>
 
+        {/* Mobile Developer Watermark */}
+        <div className="py-6 text-center space-y-1">
+          <p className="text-[10px] text-slate-400 font-medium">
+            Sri Mahaganapathy Electricals & Hardware
+          </p>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-600">
+            <span>Designed & Developed by</span>
+            <span className="text-blue-600 font-black">RR Software Solutions</span>
+          </div>
+        </div>
+
       </main>
 
       {/* Details Modal / Bottom Sheet */}

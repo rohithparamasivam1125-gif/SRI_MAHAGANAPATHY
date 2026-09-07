@@ -11,15 +11,22 @@ import {
   Percent, 
   Printer, 
   CheckCircle2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Hash,
+  Sparkles
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, capitalizeInput } from '../../utils/formatters';
+import { formatCurrency, capitalizeInput, generateInvoiceNumber } from '../../utils/formatters';
 
 export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
-  const { cart, processCheckout, settings } = useApp();
+  const { cart, processCheckout, updateExistingInvoice, editingInvoice, settings } = useApp();
 
+  const nextSeq = (settings?.invoiceSequence !== undefined ? Number(settings.invoiceSequence) : 0) + 1;
+  const autoBillNumber = generateInvoiceNumber(nextSeq, settings?.invoicePrefix || 'SMG-');
+
+  const [billNumberMode, setBillNumberMode] = useState('auto'); // 'auto' | 'custom'
+  const [customBillNumber, setCustomBillNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerGstin, setCustomerGstin] = useState('');
@@ -32,15 +39,36 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   React.useEffect(() => {
-    if (initialDiscount) {
-      if (initialDiscount.overallDiscount !== undefined) {
-        setOverallDiscount(initialDiscount.overallDiscount);
+    if (editingInvoice && isOpen) {
+      setBillNumberMode('custom');
+      setCustomBillNumber(editingInvoice.invoiceNumber || '');
+      setCustomerName(editingInvoice.customerName || '');
+      setCustomerPhone(editingInvoice.customerPhone || '');
+      setCustomerGstin(editingInvoice.customerGstin || '');
+      setPaymentMode(editingInvoice.paymentMode || 'Cash');
+      setNotes(editingInvoice.notes || '');
+      setIsGstBill(editingInvoice.isGstBill !== undefined ? editingInvoice.isGstBill : true);
+      setShowDiscount(editingInvoice.showDiscount !== undefined ? editingInvoice.showDiscount : true);
+      if (editingInvoice.discountType === 'amount' || editingInvoice.discountAmountDirect) {
+        setOverallDiscount(editingInvoice.discountAmountDirect || editingInvoice.discountAmount || 0);
+        setOverallDiscountType('amount');
+      } else if (editingInvoice.discountOverall || editingInvoice.discountAmount) {
+        setOverallDiscount(editingInvoice.discountOverall || 0);
+        setOverallDiscountType('percent');
       }
-      if (initialDiscount.overallDiscountType) {
-        setOverallDiscountType(initialDiscount.overallDiscountType);
+    } else if (isOpen) {
+      setBillNumberMode('auto');
+      setCustomBillNumber('');
+      if (initialDiscount) {
+        if (initialDiscount.overallDiscount !== undefined) {
+          setOverallDiscount(initialDiscount.overallDiscount);
+        }
+        if (initialDiscount.overallDiscountType) {
+          setOverallDiscountType(initialDiscount.overallDiscountType);
+        }
       }
     }
-  }, [initialDiscount, isOpen]);
+  }, [initialDiscount, editingInvoice, isOpen]);
 
   if (!isOpen) return null;
 
@@ -72,7 +100,12 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
     setIsSubmitting(true);
 
     try {
-      await processCheckout({
+      const finalInvoiceNumber = (billNumberMode === 'custom' && customBillNumber.trim())
+        ? customBillNumber.trim().toUpperCase()
+        : (editingInvoice ? editingInvoice.invoiceNumber : autoBillNumber);
+
+      const payload = {
+        invoiceNumber: finalInvoiceNumber,
         customerName,
         customerPhone,
         customerGstin,
@@ -83,7 +116,13 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
         discountAmountDirect: overallDiscountType === 'amount' ? Number(overallDiscount) || 0 : 0,
         isGstBill,
         showDiscount
-      });
+      };
+
+      if (editingInvoice) {
+        await updateExistingInvoice(payload);
+      } else {
+        await processCheckout(payload);
+      }
 
       // Confetti celebration
       try {
@@ -107,12 +146,18 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
       <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className={`px-6 py-4 text-white flex items-center justify-between ${
+          editingInvoice ? 'bg-amber-900 border-b border-amber-700' : 'bg-slate-900'
+        }`}>
           <div className="flex items-center gap-2.5">
-            <Receipt className="w-5 h-5 text-blue-400" />
+            <Receipt className={`w-5 h-5 ${editingInvoice ? 'text-amber-400' : 'text-blue-400'}`} />
             <div>
-              <h3 className="font-bold text-base leading-tight">Complete Billing & Print</h3>
-              <p className="text-xs text-slate-400">Total {cart.length} items in cart</p>
+              <h3 className="font-bold text-base leading-tight">
+                {editingInvoice ? `Update Bill #${customBillNumber || editingInvoice.invoiceNumber}` : 'Complete Billing & Print'}
+              </h3>
+              <p className="text-xs text-slate-300">
+                {editingInvoice ? 'Modifying existing invoice record' : `Total ${cart.length} items in cart`}
+              </p>
             </div>
           </div>
           <button
@@ -125,6 +170,73 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
 
         {/* Modal Form Body */}
         <form onSubmit={handleSubmitBill} className="p-6 overflow-y-auto flex-1 space-y-4">
+
+          {/* Bill Number Selector (Auto vs Custom) */}
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-1.5 text-xs font-black text-slate-800">
+                <Hash className="w-3.5 h-3.5 text-blue-600" />
+                <span>Bill / Invoice Number</span>
+              </label>
+
+              <div className="bg-slate-200/80 p-0.5 rounded-lg flex items-center gap-0.5 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setBillNumberMode('auto')}
+                  className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                    billNumberMode === 'auto'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Auto (System)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBillNumberMode('custom');
+                    if (!customBillNumber) {
+                      setCustomBillNumber(editingInvoice ? editingInvoice.invoiceNumber : autoBillNumber);
+                    }
+                  }}
+                  className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                    billNumberMode === 'custom'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Custom Enter
+                </button>
+              </div>
+            </div>
+
+            {billNumberMode === 'auto' ? (
+              <div className="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-blue-200 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-slate-600 font-medium">System Auto Number:</span>
+                  <span className="font-mono font-black text-blue-700 text-sm">
+                    {autoBillNumber}
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                  Sequential
+                </span>
+              </div>
+            ) : (
+              <div className="relative">
+                <Hash className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Enter custom bill number e.g. INV-101 / A-52"
+                  value={customBillNumber}
+                  onChange={(e) => setCustomBillNumber(e.target.value.toUpperCase())}
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-blue-400 rounded-xl text-sm font-mono font-black uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-slate-900"
+                  required
+                />
+              </div>
+            )}
+          </div>
           
           {/* Customer Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -378,10 +490,18 @@ export const CheckoutModal = ({ isOpen, onClose, initialDiscount = null }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-2/3 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-50"
+              className={`w-2/3 py-2.5 px-4 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-50 ${
+                editingInvoice
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-amber-600/30'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-blue-600/30'
+              }`}
             >
               <Printer className="w-4 h-4" />
-              <span>{isSubmitting ? 'Saving Invoice...' : 'Save & Print Invoice'}</span>
+              <span>
+                {isSubmitting
+                  ? (editingInvoice ? 'Updating Bill...' : 'Saving Invoice...')
+                  : (editingInvoice ? 'Update & Re-Print Bill' : 'Save & Print Invoice')}
+              </span>
             </button>
           </div>
 

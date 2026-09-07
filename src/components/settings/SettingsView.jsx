@@ -31,12 +31,13 @@ export const SettingsView = () => {
     products,
     settings, 
     updateShopSettings, 
-    seedStarterProducts, 
+    cleanDuplicateProducts, 
     isFirebaseConnected, 
     showToast,
     handleDeleteBrand
   } = useApp();
 
+  const [isCleaningDuplicates, setIsCleaningDuplicates] = useState(false);
   const [deletingBrand, setDeletingBrand] = useState(null);
   const [brandCategoryFilter, setBrandCategoryFilter] = useState('ALL'); // 'ALL' | 'Electrical' | 'Plumbing'
 
@@ -182,7 +183,7 @@ export const SettingsView = () => {
   };
 
   return (
-    <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 space-y-6">
+    <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 space-y-6 no-print">
       
       {/* Top Header */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -507,7 +508,7 @@ export const SettingsView = () => {
                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all active:scale-95 disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
-                <span>{isSaving ? 'Saving & Syncing...' : 'Save Profile & Color Changes'}</span>
+                <span>{isSaving ? 'Saving & Syncing...' : 'Save Profile & Brand Colors'}</span>
               </button>
             </div>
 
@@ -603,17 +604,49 @@ export const SettingsView = () => {
               </p>
             </div>
 
-            {/* Seed Starter Products */}
+            {/* Clean Duplicate Products */}
             <div className="pt-2 border-t border-slate-100">
               <button
                 type="button"
-                onClick={seedStarterProducts}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold rounded-xl text-xs shadow-xs transition-all active:scale-98"
+                disabled={isCleaningDuplicates}
+                onClick={async () => {
+                  setIsCleaningDuplicates(true);
+                  try {
+                    await cleanDuplicateProducts();
+                  } finally {
+                    setIsCleaningDuplicates(false);
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 font-bold rounded-xl text-xs shadow-2xs transition-all active:scale-98 cursor-pointer disabled:opacity-50"
               >
-                <Sparkles className="w-4 h-4 text-slate-950" />
-                <span>Re-seed 78+ Starter Products</span>
+                {isCleaningDuplicates ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                    <span>Cleaning Duplicates...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Clean & Remove Duplicate Products</span>
+                  </>
+                )}
               </button>
             </div>
+          </div>
+
+          {/* Software Credit & Branding Card */}
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 rounded-2xl border border-slate-700 text-white shadow-md space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black tracking-widest text-blue-400 uppercase">Software Architecture</span>
+              <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[9px] font-bold border border-blue-400/30">v2.0 Pro Edition</span>
+            </div>
+            <h4 className="text-sm font-black tracking-tight text-white flex items-center gap-1.5">
+              <span>Designed & Developed by</span>
+              <span className="text-blue-400">RR Software Solutions</span>
+            </h4>
+            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">
+              Custom-tailored POS, multi-size inventory, barcode printing, and GST ERP solution for Electricals & Hardware.
+            </p>
           </div>
 
         </div>

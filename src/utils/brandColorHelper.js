@@ -5,8 +5,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Ocean Blue',
     hex: '#2563eb',
     badge: 'bg-blue-100 text-blue-950 border-blue-300',
-    cardBorder: 'hover:border-blue-500',
+    cardBg: 'bg-blue-50/70 hover:bg-blue-50/95',
+    cardBorder: 'border-blue-200/90 hover:border-blue-500',
     cardTopBar: 'bg-blue-600',
+    cardStyle: { backgroundColor: '#f0f7ff', borderColor: '#bfdbfe' },
     iconColor: 'text-blue-600'
   },
   indigo: {
@@ -14,8 +16,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Royal Indigo',
     hex: '#4f46e5',
     badge: 'bg-indigo-100 text-indigo-950 border-indigo-300',
-    cardBorder: 'hover:border-indigo-500',
+    cardBg: 'bg-indigo-50/70 hover:bg-indigo-50/95',
+    cardBorder: 'border-indigo-200/90 hover:border-indigo-500',
     cardTopBar: 'bg-indigo-600',
+    cardStyle: { backgroundColor: '#f5f3ff', borderColor: '#c7d2fe' },
     iconColor: 'text-indigo-600'
   },
   purple: {
@@ -23,8 +27,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Vibrant Purple',
     hex: '#9333ea',
     badge: 'bg-purple-100 text-purple-950 border-purple-300',
-    cardBorder: 'hover:border-purple-500',
+    cardBg: 'bg-purple-50/70 hover:bg-purple-50/95',
+    cardBorder: 'border-purple-200/90 hover:border-purple-500',
     cardTopBar: 'bg-purple-600',
+    cardStyle: { backgroundColor: '#faf5ff', borderColor: '#e9d5ff' },
     iconColor: 'text-purple-600'
   },
   emerald: {
@@ -32,8 +38,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Emerald Green',
     hex: '#059669',
     badge: 'bg-emerald-100 text-emerald-950 border-emerald-300',
-    cardBorder: 'hover:border-emerald-500',
+    cardBg: 'bg-emerald-50/70 hover:bg-emerald-50/95',
+    cardBorder: 'border-emerald-200/90 hover:border-emerald-500',
     cardTopBar: 'bg-emerald-600',
+    cardStyle: { backgroundColor: '#f0fdf4', borderColor: '#a7f3d0' },
     iconColor: 'text-emerald-600'
   },
   amber: {
@@ -41,8 +49,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Golden Amber',
     hex: '#d97706',
     badge: 'bg-amber-100 text-amber-950 border-amber-300',
-    cardBorder: 'hover:border-amber-500',
+    cardBg: 'bg-amber-50/70 hover:bg-amber-50/95',
+    cardBorder: 'border-amber-200/90 hover:border-amber-500',
     cardTopBar: 'bg-amber-500',
+    cardStyle: { backgroundColor: '#fffdf0', borderColor: '#fde68a' },
     iconColor: 'text-amber-600'
   },
   orange: {
@@ -50,8 +60,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Flame Orange',
     hex: '#ea580c',
     badge: 'bg-orange-100 text-orange-950 border-orange-300',
-    cardBorder: 'hover:border-orange-500',
+    cardBg: 'bg-orange-50/70 hover:bg-orange-50/95',
+    cardBorder: 'border-orange-200/90 hover:border-orange-500',
     cardTopBar: 'bg-orange-600',
+    cardStyle: { backgroundColor: '#fff7ed', borderColor: '#fed7aa' },
     iconColor: 'text-orange-600'
   },
   rose: {
@@ -59,8 +71,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Crimson Red',
     hex: '#e11d48',
     badge: 'bg-rose-100 text-rose-950 border-rose-300',
-    cardBorder: 'hover:border-rose-500',
+    cardBg: 'bg-rose-50/70 hover:bg-rose-50/95',
+    cardBorder: 'border-rose-200/90 hover:border-rose-500',
     cardTopBar: 'bg-rose-600',
+    cardStyle: { backgroundColor: '#fff1f2', borderColor: '#fecdd3' },
     iconColor: 'text-rose-600'
   },
   cyan: {
@@ -68,8 +82,10 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Teal Aqua',
     hex: '#0891b2',
     badge: 'bg-cyan-100 text-cyan-950 border-cyan-300',
-    cardBorder: 'hover:border-cyan-500',
+    cardBg: 'bg-cyan-50/70 hover:bg-cyan-50/95',
+    cardBorder: 'border-cyan-200/90 hover:border-cyan-500',
     cardTopBar: 'bg-cyan-600',
+    cardStyle: { backgroundColor: '#f0fdfa', borderColor: '#a5f3fc' },
     iconColor: 'text-cyan-600'
   },
   slate: {
@@ -77,9 +93,11 @@ export const BRAND_COLOR_PALETTES = {
     label: 'Charcoal Dark',
     hex: '#0f172a',
     badge: 'bg-slate-900 text-white border-slate-700',
-    cardBorder: 'hover:border-slate-800',
+    cardBg: 'bg-slate-50/90 hover:bg-slate-100',
+    cardBorder: 'border-slate-300 hover:border-slate-600',
     cardTopBar: 'bg-slate-900',
-    iconColor: 'text-slate-300'
+    cardStyle: { backgroundColor: '#f8fafc', borderColor: '#cbd5e1' },
+    iconColor: 'text-slate-700'
   }
 };
 
@@ -113,8 +131,16 @@ export const getBrandTheme = (brandName, brandColorsConfig = {}) => {
             color: hex,
             borderColor: `${hex}60`
           },
-          cardBorder: 'hover:border-slate-400',
+          cardBg: 'hover:brightness-98',
+          cardBorder: 'hover:shadow-md',
           cardTopBar: 'bg-slate-900',
+          cardStyle: {
+            backgroundColor: `${hex}0d`, // Soft ~5% tint of brand color
+            borderColor: `${hex}45`
+          },
+          topBarStyle: {
+            backgroundColor: hex
+          },
           iconColor: 'text-slate-800'
         };
       }
@@ -130,3 +156,4 @@ export const getBrandTheme = (brandName, brandColorsConfig = {}) => {
   const fallbackKey = PALETTE_KEYS[index];
   return BRAND_COLOR_PALETTES[fallbackKey] || BRAND_COLOR_PALETTES.indigo;
 };
+

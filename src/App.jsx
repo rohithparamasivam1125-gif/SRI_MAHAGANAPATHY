@@ -15,7 +15,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 export function App() {
-  const { currentTab, toastMessage, appStatus } = useApp();
+  const { currentTab, setCurrentTab, toastMessage, appStatus } = useApp();
   const [currentRoute, setCurrentRoute] = useState(() => {
     const p = window.location.pathname.toLowerCase();
     const h = window.location.hash.toLowerCase();
@@ -105,6 +105,22 @@ export function App() {
           {currentTab === 'settings' && <SettingsView />}
         </ErrorBoundary>
       </main>
+
+      {/* Software Watermark & Developer Credit Footer */}
+      <footer className="no-print bg-slate-900/90 backdrop-blur-xs border-t border-slate-800 py-2.5 px-4 text-center text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 font-medium text-[11px]">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Sri Mahaganapathy Electricals & Hardware POS ERP</span>
+          </div>
+          <div className="flex items-center gap-2 font-semibold text-[11px] text-slate-300">
+            <span>Designed & Developed by</span>
+            <span className="px-2.5 py-0.5 rounded-md bg-blue-600/20 text-blue-400 border border-blue-500/30 font-black tracking-wide">
+              RR Software Solutions
+            </span>
+          </div>
+        </div>
+      </footer>
 
       {/* Global Toast Notification */}
       {toastMessage && (

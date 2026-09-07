@@ -47,6 +47,7 @@ export const ProductList = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
+  const [selectedBarcodeProduct, setSelectedBarcodeProduct] = useState(null);
   const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
   const [expandedRowId, setExpandedRowId] = useState(null);
 
@@ -126,10 +127,12 @@ export const ProductList = () => {
   };
 
   return (
-    <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 space-y-6">
+    <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6">
       
-      {/* Top Header & Actions Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+      {/* Main Product Table UI (Hidden during print) */}
+      <div className="no-print space-y-6">
+        {/* Top Header & Actions Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
             <Package className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
@@ -154,7 +157,10 @@ export const ProductList = () => {
 
           {/* Print Barcodes Button */}
           <button
-            onClick={() => setIsBarcodeModalOpen(true)}
+            onClick={() => {
+              setSelectedBarcodeProduct(null);
+              setIsBarcodeModalOpen(true);
+            }}
             disabled={products.length === 0}
             className="flex items-center gap-1.5 px-4 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 rounded-xl text-xs sm:text-sm font-bold transition-all disabled:opacity-50"
             title="Print sticker barcode labels for physical inventory / shelves"
@@ -421,6 +427,16 @@ export const ProductList = () => {
                         <td className="py-3.5 px-4 text-center">
                           <div className="flex items-center justify-center gap-1">
                             <button
+                              onClick={() => {
+                                setSelectedBarcodeProduct(prod);
+                                setIsBarcodeModalOpen(true);
+                              }}
+                              className="p-1.5 text-slate-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                              title={`Print Barcode Labels for "${prod.name}"`}
+                            >
+                              <Barcode className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-purple-600" />
+                            </button>
+                            <button
                               onClick={() => handleDuplicate(prod)}
                               className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                               title={`Duplicate "${prod.name}" to another Brand`}
@@ -449,9 +465,21 @@ export const ProductList = () => {
                         <tr className="bg-slate-50/80">
                           <td colSpan={7} className="p-4 border-y border-slate-200">
                             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                              <div className="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-[11px] flex justify-between">
+                              <div className="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-between">
                                 <span>Size Variant Specifications for "{prod.name}"</span>
-                                <span>{variants.length} Sizes Defined</span>
+                                <div className="flex items-center gap-2">
+                                  <span>{variants.length} Sizes Defined</span>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedBarcodeProduct(prod);
+                                      setIsBarcodeModalOpen(true);
+                                    }}
+                                    className="flex items-center gap-1 px-2.5 py-0.5 bg-purple-100 hover:bg-purple-200 text-purple-900 border border-purple-300 rounded-md font-bold text-[10px] transition-all"
+                                  >
+                                    <Barcode className="w-3 h-3 text-purple-700" />
+                                    <span>Print Size Labels</span>
+                                  </button>
+                                </div>
                               </div>
                               <table className="w-full text-left text-xs border-collapse">
                                 <thead>
@@ -493,6 +521,7 @@ export const ProductList = () => {
           </div>
         )}
       </div>
+      </div>
 
       {/* Add / Edit / Clone Product Modal */}
       {isProductModalOpen && (
@@ -527,8 +556,12 @@ export const ProductList = () => {
       {isBarcodeModalOpen && (
         <BarcodePrintModal
           isOpen={isBarcodeModalOpen}
-          onClose={() => setIsBarcodeModalOpen(false)}
+          onClose={() => {
+            setIsBarcodeModalOpen(false);
+            setSelectedBarcodeProduct(null);
+          }}
           products={products}
+          initialProduct={selectedBarcodeProduct}
         />
       )}
 

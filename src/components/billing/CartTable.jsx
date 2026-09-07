@@ -18,10 +18,23 @@ import { formatCurrency } from '../../utils/formatters';
 import { getBrandTheme } from '../../utils/brandColorHelper';
 
 export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
-  const { cart, updateCartItem, removeFromCart, clearCart, settings } = useApp();
+  const { cart, updateCartItem, removeFromCart, clearCart, settings, editingInvoice } = useApp();
 
   const [overallDiscount, setOverallDiscount] = useState(0);
   const [overallDiscountType, setOverallDiscountType] = useState('percent'); // 'percent' or 'amount'
+
+  // Pre-fill discounts if editing an existing invoice
+  React.useEffect(() => {
+    if (editingInvoice) {
+      if (editingInvoice.discountType === 'amount' || editingInvoice.discountAmountDirect) {
+        setOverallDiscount(editingInvoice.discountAmountDirect || editingInvoice.discountAmount || 0);
+        setOverallDiscountType('amount');
+      } else if (editingInvoice.discountOverall || editingInvoice.discountAmount) {
+        setOverallDiscount(editingInvoice.discountOverall || 0);
+        setOverallDiscountType('percent');
+      }
+    }
+  }, [editingInvoice]);
 
   // Subtotal calculations
   const totalBase = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -126,6 +139,11 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
                       <span className="text-xs font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">
                         Size: {item.size}
                       </span>
+                      {item.hsnCode && (
+                        <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+                          HSN: {item.hsnCode}
+                        </span>
+                      )}
                       <span className="text-xs text-slate-600 font-bold">
                         Unit: {item.unit}
                       </span>
@@ -389,9 +407,14 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
 
             <button
               onClick={() => onOpenCheckout({ overallDiscount, overallDiscountType, overallDiscountAmt })}
-              className="flex-1 py-3 px-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-xs sm:text-base transition-all active:scale-98"
+              className={`flex-1 py-3 px-3.5 font-black rounded-xl shadow-lg flex items-center justify-center gap-2 text-xs sm:text-base transition-all active:scale-98 text-white ${
+                editingInvoice 
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-amber-600/30' 
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-blue-600/30'
+              }`}
+              title={editingInvoice ? 'Update and Save Bill' : 'Proceed to Checkout'}
             >
-              <span>Proceed to Checkout</span>
+              <span>{editingInvoice ? 'Update & Save Bill' : 'Pay & Settle'}</span>
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
             </button>
           </div>

@@ -10,7 +10,9 @@ import {
   deleteProduct as fsDeleteProduct, 
   bulkDeleteProductsByBrand,
   bulkImportProducts,
+  deduplicateProducts,
   createInvoice as fsCreateInvoice,
+  updateInvoice as fsUpdateInvoice,
   deleteInvoice as fsDeleteInvoice,
   purgeExpiredInvoices,
   createQuotation as fsCreateQuotation,
@@ -71,8 +73,8 @@ const DEFAULT_SHOP_SETTINGS = {
   quotationPrefix: "QUO-",
   defaultGstRate: 18,
   terms: "1. Goods once sold will not be taken back without original bill.\n2. Warranty as per manufacturer terms.\n3. Subject to local jurisdiction.",
-  invoiceSequence: 101,
-  quotationSequence: 101,
+  invoiceSequence: 0,
+  quotationSequence: 0,
   thermalPrintMode: false
 };
 
@@ -123,6 +125,7 @@ export const AppProvider = ({ children }) => {
   // Active Billing Cart
   const [cart, setCart] = useState([]);
   const [activeInvoiceForPrint, setActiveInvoiceForPrint] = useState(null);
+  const [editingInvoice, setEditingInvoice] = useState(null);
 
   // Active Quotation Cart & Print View
   const [quotationCart, setQuotationCart] = useState([]);
@@ -249,6 +252,24 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Remove Duplicate Products from Firebase
+  const cleanDuplicateProducts = async () => {
+    try {
+      showToast('Scanning & removing duplicate products from database...', 'info');
+      const deletedCount = await deduplicateProducts();
+      if (deletedCount > 0) {
+        showToast(`Cleaned up ${deletedCount} duplicate products successfully!`, 'success');
+      } else {
+        showToast('No duplicate products found in database.', 'info');
+      }
+      return deletedCount;
+    } catch (err) {
+      console.error('Deduplicate error:', err);
+      showToast('Failed to clean duplicate products: ' + err.message, 'error');
+      throw err;
+    }
+  };
+
   // Product CRUD
   const handleAddProduct = async (productData) => {
     try {
@@ -362,6 +383,7 @@ export const AppProvider = ({ children }) => {
 
   // Finalize & Save Bill to Firestore
   const processCheckout = async ({ 
+    invoiceNumber: customInvNum,
     customerName, 
     customerPhone, 
     customerGstin,
@@ -378,8 +400,9 @@ export const AppProvider = ({ children }) => {
       return null;
     }
 
-    const nextSeq = (settings.invoiceSequence || 100) + 1;
-    const invNumber = generateInvoiceNumber(nextSeq, settings.invoicePrefix || 'SMG-');
+    const nextSeq = (settings.invoiceSequence !== undefined ? Number(settings.invoiceSequence) : 0) + 1;
+    const isCustom = Boolean(customInvNum && customInvNum.trim());
+    const invNumber = isCustom ? customInvNum.trim() : generateInvoiceNumber(nextSeq, settings.invoicePrefix || 'SMG-');
 
     // Calculate Bill Totals
     let subtotal = 0;
@@ -448,6 +471,8 @@ export const AppProvider = ({ children }) => {
       igstAmount: 0,
       discountOverall: finalDiscountPercent,
       discountAmount: Number(finalOverallDiscount.toFixed(2)),
+      discountType: discountType || 'percent',
+      discountAmountDirect: discountType === 'amount' ? Number(discountAmountDirect || finalOverallDiscount) : 0,
       roundOff,
       grandTotal,
       isGstBill,
@@ -462,12 +487,15 @@ export const AppProvider = ({ children }) => {
     };
 
     try {
-      await fsCreateInvoice(invoicePayload);
+      const docId = await fsCreateInvoice(invoicePayload);
+      invoicePayload.id = docId;
 
-      // Update sequence in settings
-      const newSettings = { ...settings, invoiceSequence: nextSeq };
-      setSettings(newSettings);
-      saveShopSettings({ invoiceSequence: nextSeq });
+      // Update sequence in settings only if system auto-generated
+      if (!isCustom) {
+        const newSettings = { ...settings, invoiceSequence: nextSeq };
+        setSettings(newSettings);
+        saveShopSettings({ invoiceSequence: nextSeq });
+      }
 
       // Clear cart & trigger print preview
       clearCart();
@@ -479,6 +507,184 @@ export const AppProvider = ({ children }) => {
       console.error('Checkout error:', e);
       showToast('Error saving invoice to Firebase: ' + e.message, 'error');
       throw e;
+    }
+  };
+
+  // ==========================================
+  // INVOICE EDITING OPERATIONS
+  // ==========================================
+
+  const loadInvoiceForEdit = (invoice) => {
+    if (!invoice) return;
+    const targetInvoice = invoice.id ? invoice : (invoices.find((inv) => inv.invoiceNumber === invoice.invoiceNumber) || invoice);
+    const cartItems = (targetInvoice.items || []).map((item, idx) => ({
+      cartItemId: item.cartItemId || `${item.productId || 'item'}_${item.size || 'std'}_${idx}`,
+      productId: item.productId || '',
+      name: item.name || '',
+      category: item.category || 'General',
+      brand: item.brand || '',
+      hsnCode: item.hsnCode || '',
+      gstRate: item.gstRate !== undefined ? item.gstRate : 18,
+      size: item.size || 'Standard',
+      unit: item.unit || 'Pcs',
+      price: Number(item.price) || 0,
+      mrp: Number(item.mrp) || Number(item.price) || 0,
+      qty: Number(item.qty) || 1,
+      discountPercent: Number(item.discountPercent) || 0,
+      availableStock: item.availableStock || 100
+    }));
+
+    setCart(cartItems);
+    setEditingInvoice(targetInvoice);
+    setCurrentTab('billing');
+    showToast(`Loaded Bill #${targetInvoice.invoiceNumber} for editing.`, 'info');
+  };
+
+  const cancelInvoiceEdit = () => {
+    setEditingInvoice(null);
+    clearCart();
+    showToast('Cancelled invoice edit mode.', 'info');
+  };
+
+  const updateExistingInvoice = async ({
+    invoiceNumber: customInvNum,
+    customerName,
+    customerPhone,
+    customerGstin,
+    paymentMode,
+    notes,
+    discountOverall = 0,
+    discountType = 'percent',
+    discountAmountDirect = 0,
+    isGstBill = true,
+    showDiscount = true
+  }) => {
+    if (!editingInvoice) return null;
+    if (cart.length === 0) {
+      showToast('Bill is empty. Please add items first.', 'error');
+      return null;
+    }
+
+    const finalInvoiceNumber = customInvNum && customInvNum.trim() ? customInvNum.trim() : editingInvoice.invoiceNumber;
+
+    let subtotal = 0;
+    let totalTax = 0;
+
+    const finalizedItems = cart.map((item) => {
+      const lineBase = item.price * item.qty;
+      const itemDiscount = (lineBase * (item.discountPercent || 0)) / 100;
+      const lineTaxable = lineBase - itemDiscount;
+      const gstRate = item.gstRate !== undefined ? item.gstRate : 18;
+      const itemTax = isGstBill ? (lineTaxable * gstRate) / 100 : 0;
+      const cgstRate = gstRate / 2;
+      const sgstRate = gstRate / 2;
+      const cgstAmount = itemTax / 2;
+      const sgstAmount = itemTax / 2;
+      const lineTotal = lineTaxable + itemTax;
+
+      subtotal += lineTaxable;
+      totalTax += itemTax;
+
+      return {
+        ...item,
+        gstRate,
+        cgstRate,
+        sgstRate,
+        cgstAmount,
+        sgstAmount,
+        lineBase,
+        itemDiscount,
+        lineTaxable,
+        itemTax,
+        lineTotal
+      };
+    });
+
+    const netBeforeOverall = subtotal + totalTax;
+    let finalOverallDiscount = 0;
+    let finalDiscountPercent = 0;
+
+    if (discountType === 'amount') {
+      finalOverallDiscount = Math.min(netBeforeOverall, Math.max(0, Number(discountAmountDirect) || 0));
+      finalDiscountPercent = netBeforeOverall > 0 ? Number(((finalOverallDiscount / netBeforeOverall) * 100).toFixed(2)) : 0;
+    } else {
+      finalDiscountPercent = Number(discountOverall) || 0;
+      finalOverallDiscount = (netBeforeOverall * finalDiscountPercent) / 100;
+    }
+
+    const grandTotal = Math.round(netBeforeOverall - finalOverallDiscount);
+    const roundOff = Number((grandTotal - (netBeforeOverall - finalOverallDiscount)).toFixed(2));
+    const cgstTotal = isGstBill ? Number((totalTax / 2).toFixed(2)) : 0;
+    const sgstTotal = isGstBill ? Number((totalTax / 2).toFixed(2)) : 0;
+
+    const invoicePayload = {
+      ...editingInvoice,
+      invoiceNumber: finalInvoiceNumber,
+      customerName: customerName ? customerName.trim() || 'Walk-in Customer' : 'Walk-in Customer',
+      customerPhone: customerPhone ? customerPhone.trim() : '',
+      customerGstin: customerGstin ? customerGstin.trim().toUpperCase() : '',
+      paymentMode: paymentMode || 'Cash',
+      items: finalizedItems,
+      totalItemsCount: cart.length,
+      subtotal: Number(subtotal.toFixed(2)),
+      totalTax: Number(totalTax.toFixed(2)),
+      cgstAmount: cgstTotal,
+      sgstAmount: sgstTotal,
+      igstAmount: 0,
+      discountOverall: finalDiscountPercent,
+      discountAmount: Number(finalOverallDiscount.toFixed(2)),
+      discountType: discountType || 'percent',
+      discountAmountDirect: discountType === 'amount' ? Number(discountAmountDirect || finalOverallDiscount) : 0,
+      roundOff,
+      grandTotal,
+      isGstBill,
+      showDiscount: showDiscount !== false,
+      notes: notes || '',
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      const targetDocId = editingInvoice.id || (invoices.find((inv) => inv.invoiceNumber === editingInvoice.invoiceNumber)?.id);
+      await fsUpdateInvoice(targetDocId, invoicePayload);
+
+      setEditingInvoice(null);
+      clearCart();
+      setActiveInvoiceForPrint(invoicePayload);
+      showToast(`Bill #${finalInvoiceNumber} updated successfully! Total: ₹${grandTotal}`, 'success');
+
+      return invoicePayload;
+    } catch (e) {
+      console.error('Update invoice error:', e);
+      showToast('Error updating invoice in Firebase: ' + e.message, 'error');
+      throw e;
+    }
+  };
+
+  const updateInvoiceNumberOnly = async (invoiceId, newInvoiceNumber) => {
+    try {
+      if (!newInvoiceNumber || !newInvoiceNumber.trim()) {
+        showToast('Bill number cannot be empty', 'error');
+        return false;
+      }
+      const trimmedNumber = newInvoiceNumber.trim().toUpperCase();
+      const targetInvoice = invoices.find((inv) => inv.id === invoiceId || inv.invoiceNumber === invoiceId);
+      const targetDocId = targetInvoice?.id || invoiceId;
+
+      await fsUpdateInvoice(targetDocId, {
+        invoiceNumber: trimmedNumber,
+        updatedAt: new Date().toISOString()
+      });
+
+      if (activeInvoiceForPrint && (activeInvoiceForPrint.id === targetDocId || activeInvoiceForPrint.invoiceNumber === invoiceId)) {
+        setActiveInvoiceForPrint((prev) => prev ? { ...prev, invoiceNumber: trimmedNumber } : null);
+      }
+
+      showToast(`Bill number updated to #${trimmedNumber}`, 'success');
+      return true;
+    } catch (err) {
+      console.error('Error updating bill number:', err);
+      showToast('Failed to update bill number: ' + err.message, 'error');
+      throw err;
     }
   };
 
@@ -558,7 +764,7 @@ export const AppProvider = ({ children }) => {
       return null;
     }
 
-    const nextSeq = (settings.quotationSequence || 100) + 1;
+    const nextSeq = (settings.quotationSequence !== undefined ? Number(settings.quotationSequence) : 0) + 1;
     const prefix = settings.quotationPrefix || 'QUO-';
     const quoNumber = `${prefix}${new Date().getFullYear()}-${String(nextSeq).padStart(4, '0')}`;
 
@@ -901,6 +1107,11 @@ export const AppProvider = ({ children }) => {
         cart,
         activeInvoiceForPrint,
         setActiveInvoiceForPrint,
+        editingInvoice,
+        setEditingInvoice,
+        loadInvoiceForEdit,
+        cancelInvoiceEdit,
+        updateExistingInvoice,
         quotationCart,
         activeQuotationForPrint,
         setActiveQuotationForPrint,
@@ -917,6 +1128,7 @@ export const AppProvider = ({ children }) => {
         appStatus,
         toggleAppLock,
         seedStarterProducts,
+        cleanDuplicateProducts,
         handleAddProduct,
         handleUpdateProduct,
         handleDeleteProduct,
@@ -934,7 +1146,8 @@ export const AppProvider = ({ children }) => {
         deleteQuotationRecord,
         convertQuotationToActiveBill,
         updateShopSettings,
-        deleteInvoiceRecord
+        deleteInvoiceRecord,
+        updateInvoiceNumberOnly
       }}
     >
       {children}

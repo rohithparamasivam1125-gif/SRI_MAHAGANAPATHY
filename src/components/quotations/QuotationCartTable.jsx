@@ -56,8 +56,13 @@ export const QuotationCartTable = ({ onPreviewQuotation }) => {
       setCustomerGstin(editingQuotation.customerGstin || '');
       setSiteLocation(editingQuotation.siteLocation || '');
       setValidityDays(editingQuotation.validityDays || 15);
-      setDiscountOverall(editingQuotation.discountOverall || 0);
-      setDiscountOverallType('percent');
+      if (editingQuotation.discountType === 'amount' || editingQuotation.discountAmountDirect) {
+        setDiscountOverall(editingQuotation.discountAmountDirect || editingQuotation.discountAmount || 0);
+        setDiscountOverallType('amount');
+      } else {
+        setDiscountOverall(editingQuotation.discountOverall || 0);
+        setDiscountOverallType('percent');
+      }
       setIsGstEstimate(editingQuotation.isGstEstimate !== undefined ? editingQuotation.isGstEstimate : true);
       setShowDiscount(editingQuotation.showDiscount !== undefined ? editingQuotation.showDiscount : true);
       setNotes(editingQuotation.notes || '');
@@ -375,6 +380,11 @@ export const QuotationCartTable = ({ onPreviewQuotation }) => {
                       <span className="text-[11px] font-black text-blue-800 bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200">
                         {item.size}
                       </span>
+                      {item.hsnCode && (
+                        <span className="text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">
+                          HSN: {item.hsnCode}
+                        </span>
+                      )}
                       <span className="text-[11px] text-slate-600 font-bold">
                         {item.unit}
                       </span>

@@ -154,21 +154,22 @@ export const ProductCatalogGrid = () => {
           <div className="relative flex-1 min-w-[260px]">
             <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
+              id="pos-product-search"
               type="text"
-              placeholder="Scan barcode or search item, brand, size (e.g. supreme elbow, 1'', leo 3/4)..."
+              placeholder="Scan barcode or search item, brand, size, HSN..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              className="w-full pl-10 pr-14 py-2 bg-slate-50 focus:bg-white rounded-xl border border-slate-300 text-slate-950 placeholder:text-slate-400 text-xs sm:text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all"
+              className="w-full pl-10 pr-20 py-2 bg-slate-50 focus:bg-white rounded-xl border border-slate-300 text-slate-950 placeholder:text-slate-400 text-xs sm:text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all"
             />
-            {searchQuery && (
+            {searchQuery ? (
               <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-slate-600 hover:text-slate-950 bg-slate-200 hover:bg-slate-300 px-2 py-0.5 rounded-md"
               >
                 Clear
               </button>
-            )}
+            ) : null}
           </div>
 
           {/* Category Tabs (Compact, High-Contrast & Bold) */}
@@ -248,7 +249,7 @@ export const ProductCatalogGrid = () => {
             )}
 
             {/* Subcategory Dropdown */}
-            {availableSubcategories.length > 2 && (
+            {availableSubcategories.length > 1 && (
               <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 px-2.5 py-1 rounded-lg">
                 <Filter className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                 <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">Subcategory:</span>
@@ -281,20 +282,23 @@ export const ProductCatalogGrid = () => {
             )}
           </div>
 
-          {/* Collapsible Pills Toggle */}
-          {availableSubcategories.length > 3 && (
-            <button
-              onClick={() => setIsSubcategoriesExpanded(!isSubcategoriesExpanded)}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs font-black text-blue-700 hover:text-blue-900 hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors ml-auto"
-            >
-              <span>{isSubcategoriesExpanded ? 'Hide Pills ▲' : 'Show Quick Pills ▼'}</span>
-            </button>
+          {/* Quick Subcategory Pills Toggle */}
+          {availableSubcategories.length > 1 && (
+            <div className="flex items-center gap-1 ml-auto">
+              <button
+                onClick={() => setIsSubcategoriesExpanded(!isSubcategoriesExpanded)}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-black text-blue-700 hover:text-blue-900 hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
+                <span>{isSubcategoriesExpanded ? 'Hide Pills ▲' : 'Quick Pills ▼'}</span>
+              </button>
+            </div>
           )}
 
         </div>
 
-        {/* Collapsible Quick Pills Drawer (Only shown if toggled) */}
-        {isSubcategoriesExpanded && availableSubcategories.length > 2 && (
+        {/* Quick Pills Bar (Visible if toggled or if small list) */}
+        {isSubcategoriesExpanded && availableSubcategories.length > 1 && (
           <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-1.5 animate-in fade-in duration-150">
             {availableSubcategories.map((sub) => {
               const isSelected = selectedSubcategory === sub;
@@ -310,7 +314,7 @@ export const ProductCatalogGrid = () => {
                       : 'bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-950 border border-slate-200'
                   }`}
                 >
-                  <span>{sub === 'ALL' ? 'All' : sub}</span>
+                  <span>{sub === 'ALL' ? 'All Subcategories' : sub}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${
                     isSelected ? 'bg-blue-950 text-white' : 'bg-white text-slate-700'
                   }`}>
@@ -360,11 +364,15 @@ export const ProductCatalogGrid = () => {
               return (
                 <div
                   key={product.id || product.name}
-                  className={`bg-white rounded-xl border border-slate-200 ${brandTheme.cardBorder} p-4 pt-4.5 shadow-xs hover:shadow-md transition-all group flex flex-col relative overflow-hidden`}
+                  className={`rounded-2xl border ${brandTheme.cardBorder} ${brandTheme.cardBg || 'bg-white'} p-4 pt-4.5 shadow-xs hover:shadow-md transition-all group flex flex-col relative overflow-hidden`}
+                  style={brandTheme.cardStyle || {}}
                 >
                   {/* Subtle top brand color accent stripe */}
                   {product.brand && (
-                    <div className={`absolute top-0 left-0 right-0 h-1 ${brandTheme.cardTopBar}`} />
+                    <div 
+                      className={`absolute top-0 left-0 right-0 h-1.5 ${brandTheme.cardTopBar}`} 
+                      style={brandTheme.topBarStyle || {}}
+                    />
                   )}
 
                   {/* Header: Category Badge, Brand & Title */}

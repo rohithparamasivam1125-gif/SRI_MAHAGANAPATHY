@@ -8,7 +8,7 @@ import {
   BarChart3, 
   Settings, 
   Database, 
-  Sparkles,
+  Sparkles, 
   FileText,
   FileSpreadsheet,
   Smartphone
@@ -133,8 +133,6 @@ export const Navbar = () => {
               <span>Analytics</span>
             </button>
 
-            {/* GST Reports is hidden as per client requirement */}
-
             <button
               onClick={() => setCurrentTab('settings')}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm sm:text-base font-bold transition-all ${
@@ -164,14 +162,14 @@ export const Navbar = () => {
               </button>
             )}
 
-            {/* Storage Sync Badge - Red "Not synced to storage" */}
+            {/* Storage Sync Badge */}
             <div 
               className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold border bg-rose-50 text-rose-700 border-rose-200 shadow-xs"
               title="Local 40-Day Temporary Cache Storage"
             >
               <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
               <Database className="w-4 h-4 text-rose-600" />
-              <span className="font-bold">
+              <span className="font-bold hidden sm:inline">
                 Not synced to storage
               </span>
             </div>

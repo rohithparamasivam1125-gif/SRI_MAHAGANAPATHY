@@ -168,6 +168,7 @@ const buildPageHtml = ({
                 <th style="padding: 5px 6px; width: 26px; text-align: center; border-right: 1px solid #334155;">${t.sNo}</th>
                 <th style="padding: 5px 8px; width: 105px; border-right: 1px solid #334155;">${t.sizeSpec}</th>
                 <th style="padding: 5px 8px; border-right: 1px solid #334155;">${t.description}</th>
+                <th style="padding: 5px 6px; width: 50px; text-align: center; border-right: 1px solid #334155;">${t.hsn || 'HSN'}</th>
                 <th style="padding: 5px 6px; width: 44px; text-align: center; border-right: 1px solid #334155;">${t.qty}</th>
                 <th style="padding: 5px 6px; width: 42px; text-align: center; border-right: 1px solid #334155;">${t.unit}</th>
                 <th style="padding: 5px 6px; width: 62px; text-align: right; border-right: 1px solid #334155;">${t.rate}</th>
@@ -200,6 +201,9 @@ const buildPageHtml = ({
                           Brand: ${toTitleCase(item.brand)}
                         </div>
                       ` : ''}
+                    </td>
+                    <td style="padding: 4px 6px; text-align: center; font-family: monospace; font-weight: bold; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
+                      ${item.hsnCode || '-'}
                     </td>
                     <td style="padding: 4px 6px; text-align: center; font-family: monospace; font-weight: bold; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
                       ${qty}

@@ -12,7 +12,11 @@ import {
   ShoppingBag,
   Loader2,
   Clock,
-  Timer
+  Timer,
+  Edit3,
+  Hash,
+  Check,
+  X
 } from 'lucide-react';
 import { useApp, getInvoiceExpiryInfo } from '../../context/AppContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
@@ -27,12 +31,33 @@ const WhatsAppIcon = ({ className = "w-4 h-4" }) => (
 );
 
 export const InvoiceHistory = () => {
-  const { invoices, deleteInvoiceRecord, settings, showToast } = useApp();
+  const { invoices, deleteInvoiceRecord, loadInvoiceForEdit, updateInvoiceNumberOnly, settings, showToast } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPaymentMode, setSelectedPaymentMode] = useState('ALL');
   const [selectedInvoiceForView, setSelectedInvoiceForView] = useState(null);
   const [sharingId, setSharingId] = useState(null);
+  const [invoiceToEditNumber, setInvoiceToEditNumber] = useState(null);
+  const [newBillNumberInput, setNewBillNumberInput] = useState('');
+  const [isUpdatingBillNumber, setIsUpdatingBillNumber] = useState(false);
+
+  const handleOpenEditNumber = (inv) => {
+    setInvoiceToEditNumber(inv);
+    setNewBillNumberInput(inv.invoiceNumber || '');
+  };
+
+  const handleSaveBillNumber = async (e) => {
+    e?.preventDefault();
+    if (!invoiceToEditNumber || !newBillNumberInput.trim()) return;
+    setIsUpdatingBillNumber(true);
+    try {
+      await updateInvoiceNumberOnly(invoiceToEditNumber.id || invoiceToEditNumber.invoiceNumber, newBillNumberInput.trim());
+      setInvoiceToEditNumber(null);
+    } catch (_) {}
+    finally {
+      setIsUpdatingBillNumber(false);
+    }
+  };
 
   const handleShareInvoice = async (inv) => {
     const invId = inv.id || inv.invoiceNumber;
@@ -211,8 +236,20 @@ export const InvoiceHistory = () => {
                       <tr key={inv.id || inv.invoiceNumber} className="hover:bg-slate-50 transition-colors">
                         
                         {/* Invoice No */}
-                        <td className="py-3.5 px-4 font-mono font-black text-blue-700 text-xs sm:text-sm">
-                          {inv.invoiceNumber}
+                        <td className="py-3.5 px-4 font-mono font-black text-xs sm:text-sm">
+                          <div className="flex items-center gap-1.5 group">
+                            <span className="text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                              #{inv.invoiceNumber}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditNumber(inv)}
+                              className="opacity-60 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                              title="Quick Change Bill Number"
+                            >
+                              <Hash className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
 
                         {/* Bill Date */}
@@ -282,7 +319,7 @@ export const InvoiceHistory = () => {
                             <button
                               onClick={() => handleShareInvoice(inv)}
                               disabled={sharingId === (inv.id || inv.invoiceNumber)}
-                              className="p-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg transition-all shadow-xs disabled:opacity-50 flex items-center justify-center"
+                              className="p-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg transition-all shadow-xs disabled:opacity-50 flex items-center justify-center cursor-pointer"
                               title="Share official PDF bill on WhatsApp"
                             >
                               {sharingId === (inv.id || inv.invoiceNumber) ? (
@@ -292,10 +329,20 @@ export const InvoiceHistory = () => {
                               )}
                             </button>
 
+                            {/* Edit Bill */}
+                            <button
+                              onClick={() => loadInvoiceForEdit(inv)}
+                              className="p-1.5 bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300 rounded-lg transition-all active:scale-95 flex items-center gap-1 font-bold text-xs cursor-pointer"
+                              title="Edit & modify this saved bill in Counter Billing"
+                            >
+                              <Edit3 className="w-4 h-4 text-amber-700" />
+                              <span className="hidden xl:inline">Edit</span>
+                            </button>
+
                             {/* Print Invoice */}
                             <button
                               onClick={() => setSelectedInvoiceForView(inv)}
-                              className="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 rounded-lg transition-colors"
+                              className="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 rounded-lg transition-colors cursor-pointer"
                               title="View & Reprint Invoice"
                             >
                               <Printer className="w-4 h-4" />
@@ -308,7 +355,7 @@ export const InvoiceHistory = () => {
                                   deleteInvoiceRecord(inv.id);
                                 }
                               }}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                               title="Delete bill"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -325,6 +372,74 @@ export const InvoiceHistory = () => {
           )}
         </div>
       </div>
+
+      {/* Quick Change Bill Number Modal */}
+      {invoiceToEditNumber && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in no-print">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="bg-slate-900 px-5 py-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Hash className="w-5 h-5 text-blue-400" />
+                <h3 className="font-bold text-base">Change Bill Number</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInvoiceToEditNumber(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBillNumber} className="p-5 space-y-4">
+              <div>
+                <p className="text-xs text-slate-600 mb-2">
+                  Customer: <strong className="text-slate-900">{invoiceToEditNumber.customerName || 'Walk-in'}</strong> • Total: <strong className="text-slate-900 font-mono">{formatCurrency(invoiceToEditNumber.grandTotal)}</strong>
+                </p>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Enter New Bill / Invoice Number:
+                </label>
+                <div className="relative">
+                  <Hash className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={newBillNumberInput}
+                    onChange={(e) => setNewBillNumberInput(e.target.value.toUpperCase())}
+                    placeholder="e.g. INV-101 / SMG-2609-0001"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 focus:bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    autoFocus
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setInvoiceToEditNumber(null)}
+                  className="w-1/2 py-2 px-3 border border-slate-300 rounded-xl text-slate-700 font-bold text-xs hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingBillNumber || !newBillNumberInput.trim()}
+                  className="w-1/2 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {isUpdatingBillNumber ? (
+                    <span>Saving...</span>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Update Number</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Invoice Reprint Modal */}
       {selectedInvoiceForView && (
