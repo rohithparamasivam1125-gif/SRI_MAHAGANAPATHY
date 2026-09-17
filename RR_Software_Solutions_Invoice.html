@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice - RR Software Solutions | Sri Mahaganapathy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f172a;
+      --primary-accent: #1e3a8a;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #cbd5e1;
+      --border-subtle: #e2e8f0;
+      --surface-subtle: #f8fafc;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f1f5f9;
+      color: var(--text-main);
+      line-height: 1.35;
+      -webkit-font-smoothing: antialiased;
+      padding: 20px 10px;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Screen Action Bar */
+    .action-bar {
+      max-width: 860px;
+      margin: 0 auto 15px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    /* Main Invoice Card (Calibrated strictly for Single-Page A4) */
+    .invoice-wrapper {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .invoice-header-strip {
+      height: 6px;
+      background: linear-gradient(90deg, #1e3a8a, #2563eb, #38bdf8);
+    }
+
+    .invoice-inner {
+      padding: 20px 28px 16px 28px;
+    }
+
+    /* Header Grid */
+    .header-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid var(--border-subtle);
+    }
+
+    .brand-block {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #ffffff;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 19px;
+      box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.4px;
+      line-height: 1.15;
+    }
+
+    .brand-subtitle {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .company-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    .invoice-badge-block {
+      text-align: right;
+    }
+
+    .doc-type-badge {
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid #bfdbfe;
+      margin-bottom: 3px;
+    }
+
+    .invoice-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .invoice-number {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #a7f3d0;
+    }
+
+    .status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* Meta Details Grid */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1.5px solid var(--border-subtle);
+    }
+
+    .meta-box-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+
+    .client-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.25;
+    }
+
+    .meta-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    .info-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 10px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label {
+      color: #64748b;
+    }
+
+    .info-value {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Table Section */
+    .table-section {
+      margin: 10px 0 8px 0;
+    }
+
+    .items-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .items-table thead {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .items-table th {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .items-table th.text-right {
+      text-align: right;
+    }
+
+    .items-table th.text-center {
+      text-align: center;
+    }
+
+    .items-table tbody tr {
+      background: #ffffff;
+    }
+
+    .items-table tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    .items-table td {
+      padding: 5px 8px;
+      font-size: 11px;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+
+    .items-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .item-num {
+      font-weight: 700;
+      color: #64748b;
+      text-align: center;
+      width: 28px;
+      font-size: 10.5px;
+    }
+
+    .module-title {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 11.5px;
+      display: inline-block;
+    }
+
+    .module-spec {
+      font-size: 10px;
+      color: #475569;
+      line-height: 1.3;
+      margin-top: 1px;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      font-size: 8.5px;
+      font-weight: 600;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      color: #334155;
+      margin-right: 2px;
+      margin-top: 1px;
+    }
+
+    .sac-code {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .line-total {
+      text-align: right;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 11.5px;
+    }
+
+    /* Calculation & Summary Section */
+    .summary-section {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+      align-items: start;
+    }
+
+    .words-and-notes {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .amount-words-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-left: 3.5px solid var(--accent);
+      border-radius: 5px;
+      padding: 6px 10px;
+    }
+
+    .amount-words-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #64748b;
+      margin-bottom: 1px;
+    }
+
+    .amount-words-text {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.25;
+    }
+
+    .handover-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 3.5px solid #059669;
+      border-radius: 5px;
+      padding: 6px 10px;
+    }
+
+    .handover-title {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #047857;
+      margin-bottom: 1px;
+    }
+
+    .handover-text {
+      font-size: 10px;
+      color: #166534;
+      line-height: 1.3;
+    }
+
+    .total-calc-card {
+      background: #ffffff;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.02);
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 2px 0;
+      color: var(--text-muted);
+    }
+
+    .calc-row.highlight {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .calc-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 4px 0;
+    }
+
+    .calc-grand-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 2px;
+    }
+
+    .grand-total-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+    }
+
+    .grand-total-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.4px;
+    }
+
+    /* Terms and Signatures */
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1.5px solid var(--border-subtle);
+    }
+
+    .terms-block h4 {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+
+    .terms-list {
+      list-style-type: decimal;
+      padding-left: 12px;
+      font-size: 9.5px;
+      color: #64748b;
+      line-height: 1.35;
+    }
+
+    .signature-block {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .sign-company {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .seal-box {
+      margin: 4px 0;
+      padding: 3px 8px;
+      border: 1.2px dashed #93c5fd;
+      background: #eff6ff;
+      border-radius: 5px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .seal-text {
+      font-size: 8.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: #1d4ed8;
+    }
+
+    .seal-sub {
+      font-size: 7.5px;
+      color: #3b82f6;
+    }
+
+    .sign-label {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: #64748b;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 2px;
+      width: 140px;
+      text-align: center;
+    }
+
+    /* Watermark */
+    .watermark-text {
+      text-align: center;
+      font-size: 9px;
+      color: #94a3b8;
+      margin-top: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    /* STRICT SINGLE-PAGE PRINT STYLES */
+    @media print {
+      html, body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+
+      .action-bar, .no-print {
+        display: none !important;
+      }
+
+      .invoice-wrapper {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        height: 100% !important;
+      }
+
+      .invoice-inner {
+        padding: 4mm 8mm 2mm 8mm !important;
+        zoom: 0.95;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Action Bar (Hidden on Print / PDF) -->
+  <div class="action-bar no-print">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 13px; font-weight: 700; color: #0f172a;">RR Software Solutions Invoice</span>
+      <span class="status-pill"><span class="status-dot"></span> Single-Page Ready</span>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="togglePaymentStatus()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        Toggle Paid / Due
+      </button>
+      <button class="btn btn-primary" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+        Print / Save PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Invoice Card -->
+  <div class="invoice-wrapper">
+    <div class="invoice-header-strip"></div>
+    <div class="invoice-inner">
+
+      <!-- Header: Vendor & Invoice Meta -->
+      <div class="header-grid">
+        <div>
+          <div class="brand-block">
+            <div class="brand-icon">RR</div>
+            <div>
+              <h1 class="brand-title">RR Software Solutions</h1>
+              <div class="brand-subtitle">Enterprise Software & Cloud Engineering</div>
+            </div>
+          </div>
+          <div class="company-meta">
+            287/A, Valanthakottai, Naduvalavu, Ichippalayam, Block A,<br>
+            Erode, Tamil Nadu - 638151<br>
+            <strong>Website:</strong> <a href="https://rrsoftware.savisoft.in/" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600;">https://rrsoftware.savisoft.in/</a>
+          </div>
+        </div>
+
+        <div class="invoice-badge-block">
+          <div class="doc-type-badge">Official Tax Invoice</div>
+          <div class="invoice-title">INVOICE</div>
+          <div class="invoice-number mono">
+            INV NO: <strong>RR-2026-27/INV-0104</strong>
+          </div>
+          <div style="margin-top: 4px;">
+            <span id="paymentStatusBadge" class="status-pill">
+              <span class="status-dot"></span> <span id="paymentStatusText">PAYMENT RECEIVED / PAID</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billed To & Dates Bar -->
+      <div class="meta-grid">
+        <div>
+          <div class="meta-box-title">Billed To (Client):</div>
+          <div class="client-name">Sri Mahaganapathy Electricals and Hardware</div>
+          <div class="meta-text">
+            1/110, Kaliamman Kovil Back Side, Maniyanur,<br>
+            Salem, Tamil Nadu - 636010<br>
+            <strong>Phone:</strong> +91 90876 83308
+          </div>
+        </div>
+
+        <div>
+          <div class="meta-box-title">Project & Deployment:</div>
+          <div class="info-card">
+            <div class="info-row">
+              <span class="info-label">Application:</span>
+              <span class="info-value">POS ERP System</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Version:</span>
+              <span class="info-value mono">v1.0 Production</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Hosting:</span>
+              <span class="info-value">Firebase Cloud SSL</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="meta-box-title">Invoice Timeline:</div>
+          <div class="info-card">
+            <div class="info-row">
+              <span class="info-label">Invoice Date:</span>
+              <span class="info-value mono">15-Sep-2026</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Delivery Date:</span>
+              <span class="info-value mono">15-Sep-2026</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">SAC Code:</span>
+              <span class="info-value mono">998314</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Itemized Table of Modules (8 Items) -->
+      <div class="table-section">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th class="item-num">#</th>
+              <th style="width: 58%;">Module Deliverable & Scope</th>
+              <th class="text-center">SAC Code</th>
+              <th class="text-right">Qty</th>
+              <th class="text-right">Amount (INR)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Module 1 -->
+            <tr>
+              <td class="item-num">01</td>
+              <td>
+                <div class="module-title">Fast POS Billing & Counter Checkout System</div>
+                <div class="module-spec">
+                  Quick billing counter software with barcode scanning, fast keyboard shortcuts, automatic discounts, customer contact saving, and UPI QR code payments.
+                </div>
+                <div>
+                  <span class="badge-tag">Fast Counter Billing</span>
+                  <span class="badge-tag">Barcode Scanner Support</span>
+                  <span class="badge-tag">Instant Discounts</span>
+                </div>
+              </td>
+              <td class="sac-code mono">998314</td>
+              <td class="text-right mono">1 Unit</td>
+              <td class="line-total mono">₹6,500.00</td>
+            </tr>
+
+            <!-- Module 2 -->
+            <tr>
+              <td class="item-num">02</td>
+              <td>
+                <div class="module-title">Mobile Phone Billing & Store Portal</div>
+                <div class="module-spec">
+                  Dedicated mobile interface designed for smartphones and tablets. Staff and owners can view sales, search items, and create bills directly from mobile.
+                </div>
+                <div>
+                  <span class="badge-tag">Mobile & Tablet Friendly</span>
+                  <span class="badge-tag">Staff Phone Access</span>
+                  <span class="badge-tag">Handheld Billing</span>
+                </div>
+              </td>
+              <td class="sac-code mono">998314</td>
+              <td class="text-right mono">1 Unit</td>
+              <td class="line-total mono">₹5,500.00</td>
+            </tr>
+
+            <!-- Module 3 -->
+            <tr>
+              <td class="item-num">03</td>
+              <td>
+                <div class="module-title">WhatsApp Instant Bill Sharing System</div>
+                <div class="module-spec">
+                  Send digital bills and price quotations directly to customer WhatsApp numbers with 1-click. Includes clean bill summary and PDF download link.
+                </div>
+                <div>
+                  <span class="badge-tag">1-Click WhatsApp Send</span>
+                  <span class="badge-tag">Paperless Bills</span>
+                  <span class="badge-tag">Customer Alerts</span>
+                </div>
+              </td>
+              <td class="sac-code mono">998314</td>
+              <td class="text-right mono">1 Unit</td>
+              <td class="line-total mono">₹4,500.00</td>
+            </tr>
+
+            <!-- Module 4 -->
+            <tr>
+              <td class="item-num">04</td>
+              <td>
+                <div class="module-title">Product & Stock Management with Excel Import</div>
+                <div class="module-spec">
+                  Easily manage electrical & hardware products, upload thousands of items instantly via Excel sheets (.xlsx), and print custom barcode stickers for shop racks.
+                </div>
+                <div>
+                  <span class="badge-tag">Excel File Upload</span>
+                  <span class="badge-tag">Barcode Sticker Print</span>
+                  <span class="badge-tag">Stock Catalog</span>
+                </div>
+              </td>
+              <td class="sac-code mono">998314</td>
+              <td class="text-right mono">1 Unit</td>
+              <td class="line-total mono">₹4,500.00</td>
+            </tr>
+
+            <!-- Module 5 -->
+            <tr>
+              <td class="item-num">05</td>
+              <td>
+                <div class="module-title">Quotation & Estimation Creator</div>
+                <div class="module-spec">
+                  Generate professional price estimates and quotations for customers. Convert any approved quotation into a final bill with just one click.
+                </div>
+                <div>
+                  <span class="badge-tag">Price Estimates</span>
+                  <span class="badge-tag">1-Click Convert to Bill</span>
+                  <span class="badge-tag">Quote History</span>
+                </div>
+              </td>
+              <td class="sac-code mono">998314</td>
+              <td class="text-right mono">1 Unit</td>
+              <td class="line-total mono">₹3,500.00</td>
+            </tr>
+
+            <!-- Module 6 -->
+            <tr>
+              <td class="item-num">06</td>
+              <td>
+                <div class="module-title">Dual Print System (Standard A4 & Thermal Roll)</div>
+                <div class="module-spec">
+                  Print bills in normal A4 size or compact 3-inch thermal receipt roll. Includes dynamic UPI QR code for instant scanning and Tamil/English bilingual labels.
+                </div>
+                <div>
+                  <span class="badge-tag">A4 & 3-Inch Thermal</span>
+                  <span class="badge-tag">Tamil & English Support</span>
+                  <span class="badge-tag">UPI QR on Bill</span>
+                </div>
+              </td>
+              <td class="sac-code mono">998314</td>
+              <td class="text-right mono">1 Unit</td>
+              <td class="line-total mono">₹3,000.00</td>
+            </tr>
+
+            <!-- Module 7 -->
+            <tr>
+              <td class="item-num">07</td>
+              <td>
+                <div class="module-title">Cloud Auto-Backup, Offline Mode & Security</div>
+                <div class="module-spec">
+                  Real-time cloud database backup ensuring sales data is never lost. Seamlessly works even when internet is disconnected, with remote admin security control.
+                </div>
+                <div>
+                  <span class="badge-tag">Automatic Cloud Backup</span>
+                  <span class="badge-tag">Works Without Internet</span>
+                  <span class="badge-tag">Admin Security</span>
+                </div>
+              </td>
+              <td class="sac-code mono">998314</td>
+              <td class="text-right mono">1 Unit</td>
+              <td class="line-total mono">₹2,500.00</td>
+            </tr>
+
+            <!-- Module 8 (Hosting) -->
+            <tr style="background: #f0f7ff;">
+              <td class="item-num" style="color: #2563eb;">08</td>
+              <td>
+                <div class="module-title" style="color: #1d4ed8;">Cloud Server Hosting, Website Domain & Security (1 Year)</div>
+                <div class="module-spec">
+                  1-Year high-speed cloud server hosting, custom web domain setup, lifetime HTTPS/SSL security encryption, and regular technical maintenance.
+                </div>
+                <div>
+                  <span class="badge-tag" style="background: #dbeafe; color: #1e40af;">1-Year Cloud Hosting</span>
+                  <span class="badge-tag" style="background: #dbeafe; color: #1e40af;">SSL HTTPS Security</span>
+                  <span class="badge-tag" style="background: #dbeafe; color: #1e40af;">Domain Setup</span>
+                </div>
+              </td>
+              <td class="sac-code mono" style="color: #1d4ed8;">998315</td>
+              <td class="text-right mono">1 Year</td>
+              <td class="line-total mono" style="color: #1d4ed8;">₹3,200.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Financial Calculation Section -->
+      <div class="summary-section">
+        <div class="words-and-notes">
+          <div class="amount-words-box">
+            <div class="amount-words-label">Invoice Amount in Words:</div>
+            <div class="amount-words-text">INR Thirty-Three Thousand Two Hundred Only</div>
+          </div>
+
+          <div class="handover-box">
+            <div class="handover-title">Project Handover & Delivery:</div>
+            <div class="handover-text">
+              Complete POS ERP software system, cloud database synchronization, smartphone portal, and 1-Year cloud server hosting successfully deployed and handed over to Sri Mahaganapathy Electricals and Hardware.
+            </div>
+          </div>
+        </div>
+
+        <div class="total-calc-card">
+          <div class="calc-row">
+            <span>Software Development (7 Modules):</span>
+            <span class="mono">₹30,000.00</span>
+          </div>
+          <div class="calc-row">
+            <span>Cloud Hosting & Server (1 Year):</span>
+            <span class="mono">₹3,200.00</span>
+          </div>
+          <div class="calc-row">
+            <span>Service Category:</span>
+            <span class="mono">SAC 998314 (IT Dev)</span>
+          </div>
+          <div class="calc-row highlight">
+            <span>Subtotal:</span>
+            <span class="mono">₹33,200.00</span>
+          </div>
+          <div class="calc-divider"></div>
+          <div class="calc-grand-total">
+            <div>
+              <div class="grand-total-label">Grand Total:</div>
+              <div style="font-size: 10px; color: #64748b;">(All Inclusive)</div>
+            </div>
+            <div class="grand-total-val mono">₹33,200.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms & Signature Footer -->
+      <div class="footer-grid">
+        <div class="terms-block">
+          <h4>Terms & Conditions:</h4>
+          <ol class="terms-list">
+            <li>Full software package & cloud hosting deployed live and verified in production.</li>
+            <li>Includes 1-Year technical support and cloud server uptime maintenance.</li>
+            <li>Cloud hosting & server upkeep renews annually upon completion of term.</li>
+          </ol>
+        </div>
+
+        <div class="signature-block">
+          <div class="sign-company">For RR SOFTWARE SOLUTIONS</div>
+          <div class="seal-box">
+            <div class="seal-text">&#10003; VERIFIED CORPORATE INVOICE</div>
+            <div class="seal-sub">Authorized Software Deliverable</div>
+          </div>
+          <div class="sign-label">Authorized Signatory</div>
+        </div>
+      </div>
+
+      <div class="watermark-text">
+        Computer-generated commercial tax invoice issued by RR Software Solutions &bull; Sri Mahaganapathy POS ERP
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let isPaid = true;
+    function togglePaymentStatus() {
+      isPaid = !isPaid;
+      const badge = document.getElementById('paymentStatusBadge');
+      const text = document.getElementById('paymentStatusText');
+      if (isPaid) {
+        badge.style.background = '#ecfdf5';
+        badge.style.color = '#059669';
+        badge.style.borderColor = '#a7f3d0';
+        text.innerText = 'PAYMENT RECEIVED / PAID';
+      } else {
+        badge.style.background = '#fff7ed';
+        badge.style.color = '#c2410c';
+        badge.style.borderColor = '#fed7aa';
+        text.innerText = 'PAYMENT DUE / PENDING';
+      }
+    }
+  </script>
+</body>
+</html>
