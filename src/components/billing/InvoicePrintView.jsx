@@ -25,6 +25,7 @@ import { useApp } from '../../context/AppContext';
 import { PRINT_TRANSLATIONS } from '../../utils/printTranslations';
 import { paginateBillItems } from '../../utils/billPaginator';
 import { getBrandTheme } from '../../utils/brandColorHelper';
+import { AddCustomItemModal } from '../common/AddCustomItemModal';
 
 export const InvoicePrintView = ({ 
   invoice, 
@@ -39,6 +40,7 @@ export const InvoicePrintView = ({
     loadInvoiceForEdit, 
     updateInvoiceNumberOnly,
     cart, 
+    addCustomItemToCart,
     updateCartItem, 
     removeFromCart, 
     clearCart, 
@@ -49,6 +51,7 @@ export const InvoicePrintView = ({
   const [activeTab, setActiveTab] = useState(isDraft ? 'workspace' : 'paper');
   const [printFormat, setPrintFormat] = useState('A4');
   const [printLanguage, setPrintLanguage] = useState('en');
+  const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
 
   // Quick edit bill number state for saved invoices
   const [isEditingSavedNumber, setIsEditingSavedNumber] = useState(false);
@@ -387,17 +390,29 @@ export const InvoicePrintView = ({
                 </span>
               </div>
 
-              {items.length > 0 && (
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={clearCart}
-                  className="flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
-                  title="Remove all items from current bill"
+                  onClick={() => setIsAddCustomModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+                  title="Add custom or local product directly to bill"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Reset All Items</span>
+                  <Plus className="w-4 h-4" />
+                  <span>+ Add Local Item</span>
                 </button>
-              )}
+
+                {items.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearCart}
+                    className="flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1.5 rounded-xl transition-colors cursor-pointer"
+                    title="Remove all items from current bill"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset All Items</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Main Interactive Table */}
@@ -409,14 +424,22 @@ export const InvoicePrintView = ({
                   </div>
                   <h4 className="text-lg font-black text-slate-700">Your bill is empty</h4>
                   <p className="text-sm text-slate-500 font-semibold max-w-sm mt-1 mb-4">
-                    Add products from the catalog to build and edit your bill.
+                    Add products from catalog or add local items directly.
                   </p>
-                  <button
-                    onClick={onClose}
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer"
-                  >
-                    ← Back to Product Catalog
-                  </button>
+                  <div className="flex flex-wrap items-center justify-center gap-2.5">
+                    <button
+                      onClick={onClose}
+                      className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                    >
+                      ← Back to Product Catalog
+                    </button>
+                    <button
+                      onClick={() => setIsAddCustomModalOpen(true)}
+                      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                    >
+                      + Add Local Item
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -547,7 +570,11 @@ export const InvoicePrintView = ({
                                 <div className="inline-flex items-center border border-slate-300 rounded-lg bg-slate-50 overflow-hidden shadow-2xs">
                                   <button
                                     type="button"
-                                    onClick={() => updateCartItem(item.cartItemId, { qty: Math.max(1, (Number(item.qty) || 1) - 1) })}
+                                    onClick={() => {
+                                      const current = Number(item.qty) || 1;
+                                      const step = current <= 1 ? 0.1 : 1;
+                                      updateCartItem(item.cartItemId, { qty: Math.max(0.01, Number((current - step).toFixed(3))) });
+                                    }}
                                     className="px-2.5 py-1.5 text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors font-black cursor-pointer"
                                   >
                                     <Minus className="w-3.5 h-3.5" />
@@ -555,15 +582,19 @@ export const InvoicePrintView = ({
                                   <input
                                     type="number"
                                     step="any"
-                                    min="0.1"
+                                    min="0.001"
                                     value={item.qty}
-                                    onChange={(e) => updateCartItem(item.cartItemId, { qty: Number(e.target.value) || 1 })}
-                                    className="w-14 py-1.5 text-center font-black text-sm bg-white focus:outline-none font-mono-numbers"
+                                    onChange={(e) => updateCartItem(item.cartItemId, { qty: e.target.value === '' ? '' : Number(e.target.value) })}
+                                    className="w-16 py-1.5 text-center font-black text-sm bg-white focus:outline-none font-mono-numbers"
                                     title="Edit quantity"
                                   />
                                   <button
                                     type="button"
-                                    onClick={() => updateCartItem(item.cartItemId, { qty: (Number(item.qty) || 1) + 1 })}
+                                    onClick={() => {
+                                      const current = Number(item.qty) || 0;
+                                      const step = current < 1 ? 0.1 : 1;
+                                      updateCartItem(item.cartItemId, { qty: Number((current + step).toFixed(3)) });
+                                    }}
                                     className="px-2.5 py-1.5 text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors font-black cursor-pointer"
                                   >
                                     <Plus className="w-3.5 h-3.5" />
@@ -818,15 +849,16 @@ export const InvoicePrintView = ({
                     <table className="w-full text-left border-collapse text-[10.5px]">
                       <thead>
                         <tr className="bg-black text-white font-bold text-[9.5px] uppercase tracking-wider">
-                          <th className="py-1 px-2 w-7 text-center">{t.sNo}</th>
+                          <th className="py-1 px-1.5 w-7 text-center">{t.sNo}</th>
                           <th className="py-1 px-2 w-28">{t.sizeSpec}</th>
-                          <th className="py-1 px-2.5">{t.description}</th>
-                          <th className="py-1 px-2 w-16 text-center">{t.hsn || 'HSN'}</th>
-                          <th className="py-1 px-2 w-14 text-center">{t.qty}</th>
-                          <th className="py-1 px-2 w-16 text-right">{t.rate}</th>
-                          {isDiscountVisible && <th className="py-1 px-2 w-14 text-right">{t.discount}</th>}
-                          <th className="py-1 px-2 w-12 text-right">{t.gst}</th>
-                          <th className="py-1 px-2.5 w-22 text-right">{t.amount}</th>
+                          <th className="py-1 px-2">{t.description}</th>
+                          <th className="py-1 px-1.5 w-14 text-center">{t.hsn || 'HSN'}</th>
+                          <th className="py-1 px-1.5 w-12 text-center">{t.qty}</th>
+                          <th className="py-1 px-1.5 w-14 text-right">{t.rate}</th>
+                          {isDiscountVisible && <th className="py-1 px-1.5 w-12 text-right">{t.discount}</th>}
+                          <th className="py-1 px-1.5 w-12 text-right">{t.sgst || 'SGST %'}</th>
+                          <th className="py-1 px-1.5 w-12 text-right">{t.cgst || 'CGST %'}</th>
+                          <th className="py-1 px-2 w-20 text-right">{t.amount}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-black/30">
@@ -835,6 +867,8 @@ export const InvoicePrintView = ({
                           const itemLineDisc = (itemLineBase * (Number(item.discountPercent) || 0)) / 100;
                           const itemLineTaxable = itemLineBase - itemLineDisc;
                           const itemLineGstRate = item.gstRate !== undefined ? Number(item.gstRate) : 18;
+                          const sgstRate = (itemLineGstRate / 2);
+                          const cgstRate = (itemLineGstRate / 2);
                           const itemLineTax = (itemLineTaxable * itemLineGstRate) / 100;
                           const calculatedLineTotal = itemLineTaxable + itemLineTax;
 
@@ -843,9 +877,9 @@ export const InvoicePrintView = ({
                               key={idx}
                               className={`print-item-row ${idx % 2 === 1 ? 'bg-slate-50' : 'bg-white'}`}
                             >
-                              <td className="py-1 px-2 text-center font-mono font-bold">{idx + 1}</td>
+                              <td className="py-1 px-1.5 text-center font-mono font-bold">{idx + 1}</td>
                               <td className="py-1 px-2 font-black text-black leading-tight">{item.size || '-'}</td>
-                              <td className="py-1 px-2.5">
+                              <td className="py-1 px-2">
                                 <span className="font-black text-black leading-tight">{item.name}</span>
                                 {item.brand && (
                                   <span className="text-[8.5px] text-slate-700 block leading-tight mt-0.5">
@@ -853,14 +887,15 @@ export const InvoicePrintView = ({
                                   </span>
                                 )}
                               </td>
-                              <td className="py-1 px-2 text-center font-mono font-semibold text-black">{item.hsnCode || '-'}</td>
-                              <td className="py-1 px-2 text-center font-mono font-bold">{item.qty} {item.unit || 'Pcs'}</td>
-                              <td className="py-1 px-2 text-right font-mono font-semibold">{Number(item.price).toFixed(2)}</td>
+                              <td className="py-1 px-1.5 text-center font-mono font-semibold text-black">{item.hsnCode || '-'}</td>
+                              <td className="py-1 px-1.5 text-center font-mono font-bold">{item.qty} {item.unit || 'Pcs'}</td>
+                              <td className="py-1 px-1.5 text-right font-mono font-semibold">{Number(item.price).toFixed(2)}</td>
                               {isDiscountVisible && (
-                                <td className="py-1 px-2 text-right font-mono">{item.discountPercent ? `${item.discountPercent}%` : '-'}</td>
+                                <td className="py-1 px-1.5 text-right font-mono">{item.discountPercent ? `${item.discountPercent}%` : '-'}</td>
                               )}
-                              <td className="py-1 px-2 text-right font-mono">{itemLineGstRate}%</td>
-                              <td className="py-1 px-2.5 text-right font-mono font-black text-black">
+                              <td className="py-1 px-1.5 text-right font-mono">{sgstRate}%</td>
+                              <td className="py-1 px-1.5 text-right font-mono">{cgstRate}%</td>
+                              <td className="py-1 px-2 text-right font-mono font-black text-black">
                                 {calculatedLineTotal.toFixed(2)}
                               </td>
                             </tr>
@@ -1022,6 +1057,15 @@ export const InvoicePrintView = ({
         )}
 
       </div>
+
+      {/* Add Local / Custom Product Modal */}
+      <AddCustomItemModal
+        isOpen={isAddCustomModalOpen}
+        onClose={() => setIsAddCustomModalOpen(false)}
+        onAddItem={addCustomItemToCart}
+        title="Add Local Product to Active Bill"
+        defaultCategory="Hardware"
+      />
 
     </div>
   );

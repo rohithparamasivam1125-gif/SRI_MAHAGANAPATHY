@@ -360,12 +360,37 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const addCustomItemToCart = (customItem) => {
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    const cartItemId = `custom_${timestamp}_${randomSuffix}`;
+    const newItem = {
+      cartItemId,
+      productId: `custom_${timestamp}`,
+      name: customItem.name,
+      category: customItem.category || 'General',
+      brand: customItem.brand || 'Local',
+      hsnCode: customItem.hsnCode || '',
+      gstRate: customItem.gstRate !== undefined ? Number(customItem.gstRate) : 18,
+      size: customItem.size || 'Standard',
+      unit: customItem.unit || 'Pcs',
+      price: Number(customItem.price) || 0,
+      mrp: Number(customItem.mrp) || Number(customItem.price) || 0,
+      qty: Number(customItem.qty) || 1,
+      discountPercent: Number(customItem.discountPercent) || 0,
+      availableStock: 9999,
+      isCustomItem: true
+    };
+    setCart((prev) => [newItem, ...prev]);
+    showToast(`Added local item "${newItem.name}" to bill.`, 'success');
+  };
+
   const updateCartItem = (cartItemId, updates) => {
     setCart((prev) =>
       prev.map((item) => {
         if (item.cartItemId === cartItemId) {
           const updated = { ...item, ...updates };
-          if (updated.qty < 0.1) updated.qty = 0.1;
+          if (updated.qty < 0.001) updated.qty = 0.001;
           return updated;
         }
         return item;
@@ -724,12 +749,37 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const addCustomItemToQuotationCart = (customItem) => {
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    const cartItemId = `custom_${timestamp}_${randomSuffix}`;
+    const newItem = {
+      cartItemId,
+      productId: `custom_${timestamp}`,
+      name: customItem.name,
+      category: customItem.category || 'General',
+      brand: customItem.brand || 'Local',
+      hsnCode: customItem.hsnCode || '',
+      gstRate: customItem.gstRate !== undefined ? Number(customItem.gstRate) : 18,
+      size: customItem.size || 'Standard',
+      unit: customItem.unit || 'Pcs',
+      price: Number(customItem.price) || 0,
+      mrp: Number(customItem.mrp) || Number(customItem.price) || 0,
+      qty: Number(customItem.qty) || 1,
+      discountPercent: Number(customItem.discountPercent) || 0,
+      availableStock: 9999,
+      isCustomItem: true
+    };
+    setQuotationCart((prev) => [newItem, ...prev]);
+    showToast(`Added local item "${newItem.name}" to quotation.`, 'success');
+  };
+
   const updateQuotationCartItem = (cartItemId, updates) => {
     setQuotationCart((prev) =>
       prev.map((item) => {
         if (item.cartItemId === cartItemId) {
           const updated = { ...item, ...updates };
-          if (updated.qty < 0.1) updated.qty = 0.1;
+          if (updated.qty < 0.001) updated.qty = 0.001;
           return updated;
         }
         return item;
@@ -1134,11 +1184,13 @@ export const AppProvider = ({ children }) => {
         handleDeleteProduct,
         handleDeleteBrand,
         addToCart,
+        addCustomItemToCart,
         updateCartItem,
         removeFromCart,
         clearCart,
         processCheckout,
         addToQuotationCart,
+        addCustomItemToQuotationCart,
         updateQuotationCartItem,
         removeFromQuotationCart,
         clearQuotationCart,

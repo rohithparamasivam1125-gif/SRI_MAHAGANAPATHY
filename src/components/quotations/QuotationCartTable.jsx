@@ -22,10 +22,12 @@ import { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { formatCurrency, capitalizeInput } from '../../utils/formatters';
 import { getBrandTheme } from '../../utils/brandColorHelper';
+import { AddCustomItemModal } from '../common/AddCustomItemModal';
 
 export const QuotationCartTable = ({ onPreviewQuotation }) => {
   const { 
     quotationCart, 
+    addCustomItemToQuotationCart,
     updateQuotationCartItem, 
     removeFromQuotationCart, 
     clearQuotationCart,
@@ -47,6 +49,7 @@ export const QuotationCartTable = ({ onPreviewQuotation }) => {
   const [showDiscount, setShowDiscount] = useState(true);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
 
   // Sync form values when an existing quotation is loaded for editing
   useEffect(() => {
@@ -240,7 +243,17 @@ export const QuotationCartTable = ({ onPreviewQuotation }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setIsAddCustomModalOpen(true)}
+            className="flex items-center gap-1 text-xs font-black text-sky-200 hover:text-white hover:bg-white/10 px-2.5 py-1 rounded-md border border-white/20 transition-colors cursor-pointer"
+            title="Add local / custom product to quotation"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Local Item</span>
+          </button>
+
           {editingQuotation && (
             <button
               onClick={cancelQuotationEdit}
@@ -340,8 +353,16 @@ export const QuotationCartTable = ({ onPreviewQuotation }) => {
             </div>
             <h4 className="text-sm font-black text-slate-700">Quotation is empty</h4>
             <p className="text-xs text-slate-500 font-semibold max-w-xs mt-1">
-              Select items from the catalog on the left to prepare an estimate proposal.
+              Select items from the catalog or add a local product directly.
             </p>
+            <button
+              type="button"
+              onClick={() => setIsAddCustomModalOpen(true)}
+              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-black rounded-xl shadow-xs transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Add Local Item</span>
+            </button>
           </div>
         ) : (
           quotationCart.map((item) => {
@@ -420,22 +441,32 @@ export const QuotationCartTable = ({ onPreviewQuotation }) => {
                   {/* Quantity */}
                   <div className="flex items-center border border-slate-300 rounded-lg bg-slate-100 overflow-hidden">
                     <button
-                      onClick={() => updateQuotationCartItem(item.cartItemId, { qty: Math.max(1, item.qty - 1) })}
-                      className="px-2 py-0.5 text-slate-700 hover:bg-slate-200 transition-colors font-bold"
+                      type="button"
+                      onClick={() => {
+                        const current = Number(item.qty) || 1;
+                        const step = current <= 1 ? 0.1 : 1;
+                        updateQuotationCartItem(item.cartItemId, { qty: Math.max(0.01, Number((current - step).toFixed(3))) });
+                      }}
+                      className="px-2 py-0.5 text-slate-700 hover:bg-slate-200 transition-colors font-bold cursor-pointer"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
                     <input
                       type="number"
                       step="any"
-                      min="0.1"
+                      min="0.001"
                       value={item.qty}
-                      onChange={(e) => updateQuotationCartItem(item.cartItemId, { qty: Number(e.target.value) || 1 })}
-                      className="w-11 py-0.5 text-center font-black text-xs bg-white focus:outline-none font-mono-numbers"
+                      onChange={(e) => updateQuotationCartItem(item.cartItemId, { qty: e.target.value === '' ? '' : Number(e.target.value) })}
+                      className="w-14 py-0.5 text-center font-black text-xs bg-white focus:outline-none font-mono-numbers"
                     />
                     <button
-                      onClick={() => updateQuotationCartItem(item.cartItemId, { qty: item.qty + 1 })}
-                      className="px-2 py-0.5 text-slate-700 hover:bg-slate-200 transition-colors font-bold"
+                      type="button"
+                      onClick={() => {
+                        const current = Number(item.qty) || 0;
+                        const step = current < 1 ? 0.1 : 1;
+                        updateQuotationCartItem(item.cartItemId, { qty: Number((current + step).toFixed(3)) });
+                      }}
+                      className="px-2 py-0.5 text-slate-700 hover:bg-slate-200 transition-colors font-bold cursor-pointer"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -640,6 +671,15 @@ export const QuotationCartTable = ({ onPreviewQuotation }) => {
 
         </div>
       )}
+
+      {/* Add Local / Custom Product Modal */}
+      <AddCustomItemModal
+        isOpen={isAddCustomModalOpen}
+        onClose={() => setIsAddCustomModalOpen(false)}
+        onAddItem={addCustomItemToQuotationCart}
+        title="Add Local Product to Quotation"
+        defaultCategory="Hardware"
+      />
 
     </div>
   );

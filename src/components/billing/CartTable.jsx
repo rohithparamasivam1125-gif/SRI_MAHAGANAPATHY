@@ -16,12 +16,14 @@ import {
 import { useApp } from '../../context/AppContext';
 import { formatCurrency } from '../../utils/formatters';
 import { getBrandTheme } from '../../utils/brandColorHelper';
+import { AddCustomItemModal } from '../common/AddCustomItemModal';
 
 export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
-  const { cart, updateCartItem, removeFromCart, clearCart, settings, editingInvoice } = useApp();
+  const { cart, addCustomItemToCart, updateCartItem, removeFromCart, clearCart, settings, editingInvoice } = useApp();
 
   const [overallDiscount, setOverallDiscount] = useState(0);
   const [overallDiscountType, setOverallDiscountType] = useState('percent'); // 'percent' or 'amount'
+  const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
 
   // Pre-fill discounts if editing an existing invoice
   React.useEffect(() => {
@@ -78,16 +80,28 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
           </div>
         </div>
 
-        {cart.length > 0 && (
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={clearCart}
-            className="flex items-center gap-1 text-xs sm:text-sm font-bold text-rose-300 hover:text-white hover:bg-rose-900/80 px-2.5 py-1 rounded-md transition-colors"
-            title="Clear all items from current bill"
+            type="button"
+            onClick={() => setIsAddCustomModalOpen(true)}
+            className="flex items-center gap-1 text-xs font-black text-blue-300 hover:text-white hover:bg-blue-900/80 px-2.5 py-1 rounded-md border border-blue-500/30 transition-colors cursor-pointer"
+            title="Add local / custom product on the fly"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Local Item</span>
           </button>
-        )}
+
+          {cart.length > 0 && (
+            <button
+              onClick={clearCart}
+              className="flex items-center gap-1 text-xs sm:text-sm font-bold text-rose-300 hover:text-white hover:bg-rose-900/80 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
+              title="Clear all items from current bill"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Cart Items Table */}
@@ -99,8 +113,16 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
             </div>
             <h4 className="text-base font-black text-slate-700">Bill is empty</h4>
             <p className="text-xs sm:text-sm text-slate-500 font-semibold max-w-xs mt-1">
-              Select products & sizes from the catalog to build this invoice.
+              Select products & sizes from catalog or add a local product.
             </p>
+            <button
+              type="button"
+              onClick={() => setIsAddCustomModalOpen(true)}
+              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-xs transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Add Local Item</span>
+            </button>
           </div>
         ) : (
           cart.map((item) => {
@@ -180,22 +202,32 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
                   {/* Quantity Stepper */}
                   <div className="flex items-center border border-slate-300 rounded-lg bg-slate-100 overflow-hidden">
                     <button
-                      onClick={() => updateCartItem(item.cartItemId, { qty: Math.max(1, item.qty - 1) })}
-                      className="px-2.5 py-1 text-slate-700 hover:bg-slate-200 transition-colors font-bold"
+                      type="button"
+                      onClick={() => {
+                        const current = Number(item.qty) || 1;
+                        const step = current <= 1 ? 0.1 : 1;
+                        updateCartItem(item.cartItemId, { qty: Math.max(0.01, Number((current - step).toFixed(3))) });
+                      }}
+                      className="px-2.5 py-1 text-slate-700 hover:bg-slate-200 transition-colors font-bold cursor-pointer"
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
                     <input
                       type="number"
                       step="any"
-                      min="0.1"
+                      min="0.001"
                       value={item.qty}
-                      onChange={(e) => updateCartItem(item.cartItemId, { qty: Number(e.target.value) || 1 })}
-                      className="w-12 py-1 text-center font-black text-sm bg-white focus:outline-none font-mono-numbers"
+                      onChange={(e) => updateCartItem(item.cartItemId, { qty: e.target.value === '' ? '' : Number(e.target.value) })}
+                      className="w-14 py-1 text-center font-black text-sm bg-white focus:outline-none font-mono-numbers"
                     />
                     <button
-                      onClick={() => updateCartItem(item.cartItemId, { qty: item.qty + 1 })}
-                      className="px-2.5 py-1 text-slate-700 hover:bg-slate-200 transition-colors font-bold"
+                      type="button"
+                      onClick={() => {
+                        const current = Number(item.qty) || 0;
+                        const step = current < 1 ? 0.1 : 1;
+                        updateCartItem(item.cartItemId, { qty: Number((current + step).toFixed(3)) });
+                      }}
+                      className="px-2.5 py-1 text-slate-700 hover:bg-slate-200 transition-colors font-bold cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
@@ -421,6 +453,15 @@ export const CartTable = ({ onOpenCheckout, onPreviewBill }) => {
 
         </div>
       )}
+
+      {/* Add Local / Custom Product Modal */}
+      <AddCustomItemModal
+        isOpen={isAddCustomModalOpen}
+        onClose={() => setIsAddCustomModalOpen(false)}
+        onAddItem={addCustomItemToCart}
+        title="Add Local Product to Bill"
+        defaultCategory="Hardware"
+      />
 
     </div>
   );

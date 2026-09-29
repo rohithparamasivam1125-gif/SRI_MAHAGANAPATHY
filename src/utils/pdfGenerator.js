@@ -166,15 +166,18 @@ const buildPageHtml = ({
             <thead>
               <tr style="background: #000000; color: #ffffff; font-weight: bold; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;">
                 <th style="padding: 5px 6px; width: 26px; text-align: center; border-right: 1px solid #334155;">${t.sNo}</th>
-                <th style="padding: 5px 8px; width: 105px; border-right: 1px solid #334155;">${t.sizeSpec}</th>
+                <th style="padding: 5px 8px; width: 100px; border-right: 1px solid #334155;">${t.sizeSpec}</th>
                 <th style="padding: 5px 8px; border-right: 1px solid #334155;">${t.description}</th>
-                <th style="padding: 5px 6px; width: 50px; text-align: center; border-right: 1px solid #334155;">${t.hsn || 'HSN'}</th>
-                <th style="padding: 5px 6px; width: 44px; text-align: center; border-right: 1px solid #334155;">${t.qty}</th>
-                <th style="padding: 5px 6px; width: 42px; text-align: center; border-right: 1px solid #334155;">${t.unit}</th>
-                <th style="padding: 5px 6px; width: 62px; text-align: right; border-right: 1px solid #334155;">${t.rate}</th>
-                ${(isInvoice && showDiscount) ? `<th style="padding: 5px 6px; width: 42px; text-align: right; border-right: 1px solid #334155;">${t.discount || 'Disc'}</th>` : ''}
-                ${isGst ? `<th style="padding: 5px 6px; width: 42px; text-align: right; border-right: 1px solid #334155;">${t.gst}</th>` : ''}
-                <th style="padding: 5px 8px; width: 75px; text-align: right;">${t.amount}</th>
+                <th style="padding: 5px 5px; width: 46px; text-align: center; border-right: 1px solid #334155;">${t.hsn || 'HSN'}</th>
+                <th style="padding: 5px 5px; width: 40px; text-align: center; border-right: 1px solid #334155;">${t.qty}</th>
+                <th style="padding: 5px 5px; width: 38px; text-align: center; border-right: 1px solid #334155;">${t.unit}</th>
+                <th style="padding: 5px 5px; width: 58px; text-align: right; border-right: 1px solid #334155;">${t.rate}</th>
+                ${(isInvoice && showDiscount) ? `<th style="padding: 5px 5px; width: 40px; text-align: right; border-right: 1px solid #334155;">${t.discount || 'Disc'}</th>` : ''}
+                ${isGst ? `
+                  <th style="padding: 5px 5px; width: 40px; text-align: right; border-right: 1px solid #334155;">${t.sgst || 'SGST %'}</th>
+                  <th style="padding: 5px 5px; width: 40px; text-align: right; border-right: 1px solid #334155;">${t.cgst || 'CGST %'}</th>
+                ` : ''}
+                <th style="padding: 5px 8px; width: 72px; text-align: right;">${t.amount}</th>
               </tr>
             </thead>
             <tbody>
@@ -184,6 +187,8 @@ const buildPageHtml = ({
                 const price = Number(item.price) || 0;
                 const lineTotal = item.lineTotal !== undefined ? Number(item.lineTotal) : (price * qty);
                 const gstRate = item.gstRate !== undefined ? item.gstRate : 18;
+                const sgstRate = (gstRate / 2);
+                const cgstRate = (gstRate / 2);
                 const bg = localIdx % 2 === 1 ? '#f8fafc' : '#ffffff';
 
                 return `
@@ -202,26 +207,29 @@ const buildPageHtml = ({
                         </div>
                       ` : ''}
                     </td>
-                    <td style="padding: 4px 6px; text-align: center; font-family: monospace; font-weight: bold; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
+                    <td style="padding: 4px 5px; text-align: center; font-family: monospace; font-weight: bold; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
                       ${item.hsnCode || '-'}
                     </td>
-                    <td style="padding: 4px 6px; text-align: center; font-family: monospace; font-weight: bold; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
+                    <td style="padding: 4px 5px; text-align: center; font-family: monospace; font-weight: bold; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
                       ${qty}
                     </td>
-                    <td style="padding: 4px 6px; text-align: center; font-family: monospace; color: #334155; border-right: 1px solid rgba(0,0,0,0.15);">
+                    <td style="padding: 4px 5px; text-align: center; font-family: monospace; color: #334155; border-right: 1px solid rgba(0,0,0,0.15);">
                       ${item.unit || 'Pcs'}
                     </td>
-                    <td style="padding: 4px 6px; text-align: right; font-family: monospace; font-weight: 600; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
+                    <td style="padding: 4px 5px; text-align: right; font-family: monospace; font-weight: 600; color: #000000; border-right: 1px solid rgba(0,0,0,0.15);">
                       ${price.toFixed(2)}
                     </td>
                     ${(isInvoice && showDiscount) ? `
-                      <td style="padding: 4px 6px; text-align: right; font-family: monospace; color: #334155; border-right: 1px solid rgba(0,0,0,0.15);">
+                      <td style="padding: 4px 5px; text-align: right; font-family: monospace; color: #334155; border-right: 1px solid rgba(0,0,0,0.15);">
                         ${item.discountPercent ? `${item.discountPercent}%` : '-'}
                       </td>
                     ` : ''}
                     ${isGst ? `
-                      <td style="padding: 4px 6px; text-align: right; font-family: monospace; color: #334155; border-right: 1px solid rgba(0,0,0,0.15);">
-                        ${gstRate}%
+                      <td style="padding: 4px 5px; text-align: right; font-family: monospace; color: #334155; border-right: 1px solid rgba(0,0,0,0.15);">
+                        ${sgstRate}%
+                      </td>
+                      <td style="padding: 4px 5px; text-align: right; font-family: monospace; color: #334155; border-right: 1px solid rgba(0,0,0,0.15);">
+                        ${cgstRate}%
                       </td>
                     ` : ''}
                     <td style="padding: 4px 8px; text-align: right; font-family: monospace; font-weight: 900; color: #000000;">
